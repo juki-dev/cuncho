@@ -1,0 +1,49 @@
+/* Paleta Warm Artisan y tipografía. Fuente de verdad: CLAUDE.md + design/ */
+:root {
+  --bg: #FAF5EE;
+  --surface: #FFFDF9;
+  --text-strong: #2C1810;
+  --text: #3C2A21;
+  --text-2: #5E4838;
+  --text-3: #7A6352;
+  --accent: #C85A32;
+  --accent-2: #E07A5F;
+  --accent-ink: #B24F2B;
+  --selected-bg: #F8E6DC;
+  --selected-text: #8F3D1E;
+  --border: #EADBC8;
+  --border-2: #E5D5C5;
+  --user-loc: #3A7CA5;
+
+  /* Derivados usados en design/ */
+  --map-bg: #F3EBDF;
+  --tag-bg: #F5EADF;
+  --selected-card-bg: #FBEFE8;
+  --dashed: #D9C3A8;
+  --divider: #F0E4D6;
+  --icon-bg-neutral: #EFE6D6;
+  --placeholder: #9A8572;
+  --on-accent: #FFFFFF;
+  --scrim: rgba(44, 24, 16, 0.48);
+  --user-loc-halo: rgba(58, 124, 165, 0.18);
+
+  --shadow-float: 0 10px 30px rgba(60, 42, 33, 0.12);
+  --shadow-popup: 0 14px 34px rgba(60, 42, 33, 0.2);
+  --shadow-card: 0 12px 30px rgba(60, 42, 33, 0.1);
+  --shadow-sheet: 0 -10px 30px rgba(44, 24, 16, 0.2);
+  --shadow-pin: 0 6px 14px rgba(44, 24, 16, 0.3);
+  --shadow-pin-rec: 0 8px 18px rgba(178, 79, 43, 0.45);
+  --shadow-fab: 0 10px 22px rgba(200, 90, 50, 0.4);
+  --shadow-fab-close: 0 10px 22px rgba(44, 24, 16, 0.35);
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Manrope', system-ui, sans-serif;
+
+  --bottom-bar-h: 88px;
+  --tap: 44px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --content-max: 560px;
+}

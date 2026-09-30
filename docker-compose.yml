@@ -1,0 +1,122 @@
+# Entorno local completo. Levantar: docker compose up -d --build
+#   API        http://localhost:3000/api/v1   (Swagger en /docs, salud en /health)
+#   Frontend   http://localhost:5173
+#   PostGIS    localhost:5433
+#
+# El código de src/ va montado: Nest y Vite recompilan al guardar. Si cambian las
+# dependencias (package.json) hay que reconstruir: docker compose up -d --build
+name: cuncho
+
+# Conexión a la base, compartida por api y migrations. Dentro de la red de compose
+# la base es db:5432; el 5433 es solo el puerto publicado en el host.
+x-db-env: &db-env
+  DB_HOST: db
+  DB_PORT: 5432
+  DB_USER: coffee
+  DB_PASSWORD: coffee
+  DB_NAME: cuncho
+  DB_SSL: "false"
+
+x-api-build: &api-build
+  context: ./apps/api
+  target: development
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: coffee
+      POSTGRES_PASSWORD: coffee
+      POSTGRES_DB: cuncho
+    ports:
+      # 5433 en el host para no chocar con otro Postgres local en 5432.
+      - "5433:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U coffee -d cuncho"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # Job de un solo uso: aplica las migraciones y termina. La api no arranca hasta
+  # que salga con código 0. Es idempotente, así que se ejecuta en cada `up`.
+  # Datos de ejemplo: docker compose run --rm migrations npm run seed
+  migrations:
+    build: *api-build
+    image: cuncho-api:dev
+    command: npm run migration:run
+    environment:
+      <<: *db-env
+      NODE_ENV: development
+    volumes:
+      - ./apps/api/src:/app/src
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build: *api-build
+    image: cuncho-api:dev
+    environment:
+      <<: *db-env
+      NODE_ENV: development
+      PORT: 3000
+      LOG_LEVEL: debug
+      SWAGGER_ENABLED: "true"
+      # Origen del frontend de este mismo compose.
+      CORS_ORIGINS: http://localhost:5173
+      # Secreto solo para local. Para usar otro: JWT_ACCESS_SECRET=... docker compose up -d
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-secreto-solo-para-desarrollo-local-no-usar-en-produccion}
+      JWT_ACCESS_TTL_SECONDS: 900
+      JWT_REFRESH_TTL_SECONDS: 2592000
+      THROTTLE_TTL_MS: 60000
+      THROTTLE_LIMIT: 120
+      THROTTLE_AUTH_LIMIT: 10
+      RECOMMENDATION_DEFAULT_RADIUS_KM: 2.5
+      RECOMMENDATION_MAX_RADIUS_KM: 25
+      RECOMMENDATION_WEIGHT_JACCARD: 0.60
+      RECOMMENDATION_WEIGHT_DISTANCE: 0.25
+      RECOMMENDATION_WEIGHT_SCORE: 0.15
+      RECOMMENDATION_MAX_RESULTS: 20
+    ports:
+      - "3000:3000"
+    volumes:
+      # Solo src/: node_modules y dist/ se quedan en la imagen.
+      - ./apps/api/src:/app/src
+    depends_on:
+      db:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+
+  frontend:
+    build:
+      context: ./apps/frontend
+      target: development
+    image: cuncho-frontend:dev
+    environment:
+      # El navegador llama a la API directamente (CORS ya lo permite), igual que
+      # en producción, donde la API vive en otro dominio.
+      VITE_API_URL: http://localhost:3000/api/v1
+      # true = MSW con datos de ejemplo. Para pegarle a la api de este compose:
+      # VITE_API_MOCKS=false docker compose up -d
+      VITE_API_MOCKS: ${VITE_API_MOCKS:-true}
+      # API key de CARTO basemaps. Vite expone las VITE_* del entorno igual que
+      # las de un .env, y aquí es la única vía: .env.local está en .dockerignore
+      # y los volúmenes solo montan src/, public/ e index.html. Ponla en el .env
+      # de esta carpeta (ignorado por git); compose lo lee solo.
+      VITE_CARTO_KEY: ${VITE_CARTO_KEY:-}
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./apps/frontend/src:/app/src
+      - ./apps/frontend/public:/app/public
+      - ./apps/frontend/index.html:/app/index.html
+    depends_on:
+      api:
+        condition: service_started
+
+volumes:
+  db-data:

@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Cuncho · Recomendación</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#FAF5EE;font-family:Manrope,system-ui,sans-serif;color:#3C2A21}
+a{color:#B24F2B}a:hover{color:#8F3D1E}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #FAF5EE; font-family: Manrope, system-ui, sans-serif; color: #3C2A21">
+
+<header style="padding: 24px 20px 0; display: flex; align-items: center; gap: 12px">
+<a href="Acciones.dc.html" aria-label="Volver" style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 22px; border: 1px solid #EADBC8; background: #FFFDF9; display: flex; align-items: center; justify-content: center; color: #3C2A21">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"></path></svg>
+</a>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #7A6352">Recomendación</span>
+<h1 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 24px; font-weight: 700; color: #2C1810">¿Qué te provoca hoy?</h1>
+</div>
+</header>
+
+<main style="padding: 18px 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<sc-for list="{{descs}}" as="d" hint-placeholder-count="4">
+<button type="button" onClick="{{d.pick}}" aria-pressed="{{d.on}}" style="{{d.style}}">
+<span style="font-size: 15px; font-weight: 800">{{d.label}}</span>
+<span style="font-size: 12px; font-weight: 500; color: #7A6352">{{d.hint}}</span>
+</button>
+</sc-for>
+</div>
+
+<div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #5E4838">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3A7CA5" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="2.5" fill="#3A7CA5"></circle></svg>
+Buscando cataciones en un radio de 2.5 km
+</div>
+
+<sc-if value="{{hasResult}}" hint-placeholder-val="{{ true }}">
+<article style="background: #FFFDF9; border: 1px solid #EADBC8; border-radius: 22px; overflow: hidden; box-shadow: 0 12px 30px rgba(60, 42, 33, 0.1)">
+<div style="padding: 16px 16px 12px; display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid #F0E4D6">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #B24F2B">Tu mejor opción cerca</span>
+<h2 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 22px; font-weight: 700; color: #2C1810">{{best.name}}</h2>
+<span style="font-size: 13px; font-weight: 600; color: #5E4838">{{best.distText}} · a pie {{best.walk}}</span>
+</div>
+<div style="width: 64px; height: 64px; flex-shrink: 0; border-radius: 32px; background: #3C2A21; color: #FFFFFF; display: flex; flex-direction: column; align-items: center; justify-content: center">
+<span style="font-size: 20px; font-weight: 800; line-height: 1">{{best.score}}</span>
+<span style="font-size: 10px; font-weight: 700; color: #EADBC8">promedio</span>
+</div>
+</div>
+<div style="padding: 12px 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; font-weight: 700; color: #7A6352">Variedad</span><span style="font-size: 14px; font-weight: 800; color: #2C1810">{{best.variety}}</span></div>
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; font-weight: 700; color: #7A6352">Método</span><span style="font-size: 14px; font-weight: 800; color: #2C1810">{{best.method}}</span></div>
+</div>
+<div style="padding: 0 16px 16px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #5E4838"><span>Coincidencia de notas</span><span>{{best.matchText}}</span></div>
+<div style="height: 8px; border-radius: 4px; background: #F0E4D6; overflow: hidden"><div style="{{best.barStyle}}"></div></div>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{best.notes}}" as="n" hint-placeholder-count="3">
+<span style="{{n.style}}">{{n.label}}</span>
+</sc-for>
+</div>
+</div>
+</article>
+<div style="display: flex; gap: 10px">
+<a href="Main.dc.html" style="flex-grow: 1; height: 52px; border-radius: 16px; background: #B24F2B; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800">Ver en el mapa</a>
+<button type="button" onClick="{{next}}" style="flex-grow: 1; height: 52px; border-radius: 16px; border: 1px solid #E5D5C5; background: #FFFDF9; color: #3C2A21; font-family: Manrope, sans-serif; font-size: 15px; font-weight: 800; cursor: pointer">Otra opción ({{altCount}})</button>
+</div>
+</sc-if>
+<sc-if value="{{noResult}}" hint-placeholder-val="{{ false }}">
+<div style="padding: 24px; border-radius: 20px; border: 1.5px dashed #D9C3A8; text-align: center; font-size: 14px; color: #5E4838">Elige al menos una familia de sabor para buscar tu taza.</div>
+</sc-if>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { picked: ['frutal', 'floral'], rank: 0 }; }
+  renderVals() {
+    const s = this.state;
+    const D = [
+      { id: 'frutal', label: 'Frutal / Cítrico', hint: 'Frutos rojos, naranja' },
+      { id: 'chocolate', label: 'Chocolate / Nueces', hint: 'Cacao, avellana' },
+      { id: 'floral', label: 'Floral', hint: 'Jazmín, hibisco' },
+      { id: 'dulce', label: 'Dulce / Panela', hint: 'Caramelo, miel' }
+    ];
+    const card = (on) => 'min-height: 72px; padding: 12px 14px; border-radius: 18px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px; text-align: left; cursor: pointer; font-family: Manrope, sans-serif; color: ' + (on ? '#8F3D1E' : '#2C1810') + '; background: ' + (on ? '#FBEFE8' : '#FFFDF9') + '; border: ' + (on ? '2px solid #C85A32' : '1px solid #EADBC8');
+    const descs = D.map((d) => {
+      const on = s.picked.indexOf(d.id) >= 0;
+      return Object.assign({}, d, { on: on ? 'true' : 'false', style: card(on), pick: () => this.setState({ rank: 0, picked: on ? s.picked.filter((x) => x !== d.id) : s.picked.concat([d.id]) }) });
+    });
+    const R = 2.5;
+    const cafes = [
+      { name: 'Origen Cafetería', km: 0.4, score: 92, variety: 'Bourbon Rosado', method: 'Aeropress', tags: ['frutal', 'floral'], notes: ['Frutos Rojos', 'Hibisco', 'Cítricos'] },
+      { name: 'Café Laureles', km: 0.9, score: 89, variety: 'Geisha', method: 'V60', tags: ['floral', 'frutal'], notes: ['Jazmín', 'Bergamota', 'Durazno'] },
+      { name: 'Tostadores del Cable', km: 1.6, score: 86, variety: 'Castillo', method: 'Chemex', tags: ['dulce', 'frutal'], notes: ['Panela', 'Caramelo', 'Naranja'] },
+      { name: 'La Mesa del Barista', km: 1.1, score: 84, variety: 'Caturra', method: 'Espresso', tags: ['chocolate', 'dulce'], notes: ['Chocolate Negro', 'Nuez', 'Panela'] }
+    ];
+    const noteTag = { 'Frutos Rojos': 'frutal', 'Cítricos': 'frutal', 'Durazno': 'frutal', 'Naranja': 'frutal', 'Bergamota': 'floral', 'Hibisco': 'floral', 'Jazmín': 'floral', 'Panela': 'dulce', 'Caramelo': 'dulce', 'Chocolate Negro': 'chocolate', 'Nuez': 'chocolate' };
+    const jaccard = (a, b) => { const inter = a.filter((x) => b.indexOf(x) >= 0).length; const uni = new Set(a.concat(b)).size; return uni ? inter / uni : 0; };
+    const ranked = cafes.filter((c) => c.km <= R).map((c) => {
+      const j = jaccard(s.picked, c.tags);
+      return Object.assign({}, c, { j, total: 0.6 * j + 0.25 * (1 - c.km / R) + 0.15 * (c.score / 100) });
+    }).filter((c) => c.j > 0).sort((a, b) => b.total - a.total);
+    const hasResult = s.picked.length > 0 && ranked.length > 0;
+    let best = { name: '', score: '', variety: '', method: '', distText: '', walk: '', matchText: '', barStyle: 'height: 8px; width: 0', notes: [] };
+    if (hasResult) {
+      const c = ranked[s.rank % ranked.length];
+      const pct = Math.round(c.j * 100);
+      best = {
+        name: c.name, score: String(c.score), variety: c.variety, method: c.method,
+        distText: c.km < 1 ? Math.round(c.km * 1000) + ' m' : c.km.toFixed(1) + ' km',
+        walk: Math.max(1, Math.round(c.km * 12)) + ' min',
+        matchText: pct + ' %',
+        barStyle: 'height: 8px; border-radius: 4px; background: #C85A32; width: ' + pct + '%',
+        notes: c.notes.map((n) => {
+          const hit = s.picked.indexOf(noteTag[n]) >= 0;
+          return { label: n, style: 'padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 700; background: ' + (hit ? '#F8E6DC' : '#F5EADF') + '; color: ' + (hit ? '#8F3D1E' : '#5E4838') };
+        })
+      };
+    }
+    return { descs, hasResult, noResult: !hasResult, best, altCount: Math.max(0, ranked.length - 1), next: () => this.setState({ rank: s.rank + 1 }) };
+  }
+}
+</script>
+</body>
+</html>

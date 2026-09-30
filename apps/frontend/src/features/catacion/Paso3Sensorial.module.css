@@ -1,0 +1,28 @@
+.seg { display: flex; padding: 3px; border-radius: 12px; background: var(--tag-bg); }
+.segBtn {
+  min-height: 36px;
+  min-width: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 9px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 800;
+  background: transparent;
+  color: var(--text-3);
+}
+.segBtn[aria-pressed='true'] {
+  background: var(--surface);
+  color: var(--text-strong);
+  box-shadow: 0 1px 3px rgba(60, 42, 33, 0.15);
+}
+.score { display: flex; align-items: baseline; gap: 10px; }
+.scoreNum {
+  font-family: var(--font-display);
+  font-size: 44px;
+  font-weight: 700;
+  color: var(--text-strong);
+  line-height: 1;
+}
+.scoreLabel { font-size: 14px; font-weight: 700; color: var(--selected-text); }

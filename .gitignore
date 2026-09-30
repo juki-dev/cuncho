@@ -1,0 +1,7 @@
+node_modules
+dist
+
+# Variables de compose (incluye VITE_CARTO_KEY). Nunca al repo.
+.env
+.env.local
+.env.*.local

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Cuncho · Arquitectura de datos</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&amp;family=Manrope:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap">
+<style>
+body{margin:0;background:#FAF5EE;font-family:Manrope,system-ui,sans-serif;color:#3C2A21}
+a{color:#B24F2B}a:hover{color:#8F3D1E}
+</style>
+</helmet>
+<div style="width: 1280px; height: 960px; box-sizing: border-box; padding: 56px 64px; background: #FAF5EE; font-family: Manrope, system-ui, sans-serif; color: #3C2A21; display: flex; flex-direction: column; gap: 32px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 13px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #B24F2B">Cuncho</span>
+<h1 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 44px; font-weight: 700; color: #2C1810">Arquitectura de datos y lógica de recomendación</h1>
+</div>
+
+<div style="display: flex; align-items: center; gap: 12px">
+<div style="padding: 14px 18px; border-radius: 16px; background: #FFFDF9; border: 1px solid #EADBC8; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; font-weight: 800; color: #7A6352">1 · ENTRADA</span><span style="font-size: 15px; font-weight: 800; color: #2C1810">GPS del usuario + notas elegidas</span></div>
+<svg width="36" height="16" viewBox="0 0 36 16" aria-hidden="true"><path d="M0 8h30M24 2l7 6-7 6" stroke="#B24F2B" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<div style="padding: 14px 18px; border-radius: 16px; background: #FFFDF9; border: 1px solid #EADBC8; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; font-weight: 800; color: #7A6352">2 · FILTRO</span><span style="font-size: 15px; font-weight: 800; color: #2C1810">Haversine · d ≤ 2.5 km</span></div>
+<svg width="36" height="16" viewBox="0 0 36 16" aria-hidden="true"><path d="M0 8h30M24 2l7 6-7 6" stroke="#B24F2B" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<div style="padding: 14px 18px; border-radius: 16px; background: #FFFDF9; border: 1px solid #EADBC8; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; font-weight: 800; color: #7A6352">3 · SIMILITUD</span><span style="font-size: 15px; font-weight: 800; color: #2C1810">Jaccard sobre etiquetas</span></div>
+<svg width="36" height="16" viewBox="0 0 36 16" aria-hidden="true"><path d="M0 8h30M24 2l7 6-7 6" stroke="#B24F2B" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<div style="padding: 14px 18px; border-radius: 16px; background: #FBEFE8; border: 2px solid #C85A32; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; font-weight: 800; color: #8F3D1E">4 · SALIDA</span><span style="font-size: 15px; font-weight: 800; color: #2C1810">Ranking → tarjeta sugerida</span></div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; flex-grow: 1">
+<section style="padding: 24px; border-radius: 22px; background: #2C1810; color: #F5EADF; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 14px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: #E9B89F">Esquema JSON · catación</h2>
+<pre style="margin: 0; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; line-height: 1.55; color: #F5EADF; white-space: pre">{
+  "id": "cat_0192",
+  "usuario_id": "usr_031",
+  "creado_en": "2026-09-28T16:40:00-05:00",
+  "lugar": {
+    "id": "loc_origen",
+    "nombre": "Origen Cafetería",
+    "lat": 5.0689,
+    "lng": -75.5174
+  },
+  "grano": {
+    "variedad": "Bourbon Rosado",
+    "finca": "[Finca]",
+    "region": "Pitalito, Huila",
+    "proceso": "Anaeróbico",
+    "metodo": "Aeropress"
+  },
+  "sensorial": {
+    "acidez": { "nivel": 3, "tipo": "Cítrica" },
+    "notas": ["Frutos Rojos", "Hibisco", "Cítricos"],
+    "descriptores": ["frutal", "floral"],
+    "puntaje": 92.0,
+    "escala": "SCA"
+  }
+}</pre>
+</section>
+
+<div style="display: flex; flex-direction: column; gap: 20px">
+<section style="padding: 22px; border-radius: 22px; background: #FFFDF9; border: 1px solid #EADBC8; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 22px; font-weight: 700; color: #2C1810">Distancia · Haversine</h2>
+<div style="padding: 14px 16px; border-radius: 14px; background: #F5EADF; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 14px; color: #2C1810; line-height: 1.6">a = sin²(Δφ/2) + cos φ₁ · cos φ₂ · sin²(Δλ/2)<br>d = 2R · atan2(√a, √(1−a)),  R = 6371 km</div>
+<p style="margin: 0; font-size: 14px; line-height: 1.5; color: #5E4838">Descarta todas las cataciones cuyo lugar esté a más de 2.5 km del usuario. Para rendimiento, se pre-filtra con un bounding box (±0.023° lat) antes de calcular la distancia exacta.</p>
+</section>
+<section style="padding: 22px; border-radius: 22px; background: #FFFDF9; border: 1px solid #EADBC8; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 22px; font-weight: 700; color: #2C1810">Similitud · Jaccard</h2>
+<div style="padding: 14px 16px; border-radius: 14px; background: #F5EADF; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 14px; color: #2C1810; line-height: 1.6">J(A, B) = |A ∩ B| / |A ∪ B|</div>
+<p style="margin: 0; font-size: 14px; line-height: 1.5; color: #5E4838">A = descriptores elegidos por el usuario; B = descriptores agregados de las cataciones del lugar.</p>
+</section>
+<section style="padding: 22px; border-radius: 22px; background: #FBEFE8; border: 2px solid #C85A32; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 22px; font-weight: 700; color: #2C1810">Puntaje final (propuesta)</h2>
+<div style="padding: 14px 16px; border-radius: 14px; background: #FFFDF9; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 14px; color: #2C1810; line-height: 1.6">S = 0.60·J + 0.25·(1 − d/R) + 0.15·(puntaje/100)</div>
+<p style="margin: 0; font-size: 14px; line-height: 1.5; color: #5E4838">Solo entran lugares con J &gt; 0. Los pesos son ajustables; es la misma fórmula que usa la pantalla de recomendación del prototipo.</p>
+</section>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":960}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

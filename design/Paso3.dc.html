@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Catación · Paso 3 · Evaluación sensorial</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#FAF5EE;font-family:Manrope,system-ui,sans-serif;color:#3C2A21}
+a{color:#B24F2B}a:hover{color:#8F3D1E}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #FAF5EE; font-family: Manrope, system-ui, sans-serif; color: #3C2A21">
+
+<header style="padding: 24px 20px 0; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; gap: 12px">
+<a href="Paso2.dc.html" aria-label="Volver" style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 22px; border: 1px solid #EADBC8; background: #FFFDF9; display: flex; align-items: center; justify-content: center; color: #3C2A21">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"></path></svg>
+</a>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #7A6352">Paso 3 de 3 · Sensorial</span>
+<h1 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 24px; font-weight: 700; color: #2C1810">¿Cómo sabe?</h1>
+</div>
+</div>
+<div style="display: flex; gap: 6px" aria-hidden="true">
+<span style="flex-grow: 1; height: 4px; border-radius: 2px; background: #C85A32"></span>
+<span style="flex-grow: 1; height: 4px; border-radius: 2px; background: #C85A32"></span>
+<span style="flex-grow: 1; height: 4px; border-radius: 2px; background: #C85A32"></span>
+</div>
+</header>
+
+<main style="padding: 18px 20px; display: flex; flex-direction: column; gap: 14px">
+<section style="padding: 16px; background: #FFFDF9; border: 1px solid #EADBC8; border-radius: 20px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: baseline">
+<label for="acidez" style="font-size: 13px; font-weight: 800; color: #2C1810">Acidez</label>
+<span style="padding: 4px 12px; border-radius: 12px; background: #F8E6DC; color: #8F3D1E; font-size: 13px; font-weight: 800">{{acidLabel}}</span>
+</div>
+<input id="acidez" type="range" min="1" max="5" step="1" value="{{acid}}" onChange="{{onAcid}}" style="width: 100%; height: 28px; accent-color: #C85A32; margin: 0">
+<div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; color: #7A6352">
+<span>Láctica</span><span>Málica</span><span>Cítrica</span><span>Tartárica</span><span>Fosfórica</span>
+</div>
+</section>
+
+<section style="padding: 16px; background: #FFFDF9; border: 1px solid #EADBC8; border-radius: 20px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: baseline">
+<h2 style="margin: 0; font-size: 13px; font-weight: 800; color: #2C1810">Perfil de sabor</h2>
+<span style="font-size: 12px; font-weight: 600; color: #7A6352">{{noteCount}}</span>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{notes}}" as="c" hint-placeholder-count="8">
+<button type="button" onClick="{{c.pick}}" aria-pressed="{{c.on}}" style="{{c.style}}">{{c.label}}</button>
+</sc-for>
+</div>
+</section>
+
+<section style="padding: 16px; background: #FFFDF9; border: 1px solid #EADBC8; border-radius: 20px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: center">
+<label for="puntaje" style="font-size: 13px; font-weight: 800; color: #2C1810">Puntuación</label>
+<div style="display: flex; padding: 3px; border-radius: 12px; background: #F5EADF" role="group" aria-label="Escala">
+<button type="button" onClick="{{toSca}}" aria-pressed="{{isSca}}" style="{{scaStyle}}">SCA</button>
+<button type="button" onClick="{{toPersonal}}" aria-pressed="{{isPersonal}}" style="{{personalStyle}}">Personal</button>
+</div>
+</div>
+<div style="display: flex; align-items: baseline; gap: 10px">
+<span style="font-family: Fraunces, Georgia, serif; font-size: 44px; font-weight: 700; color: #2C1810; line-height: 1">{{scoreText}}</span>
+<span style="font-size: 14px; font-weight: 700; color: #8F3D1E">{{scoreLabel}}</span>
+</div>
+<input id="puntaje" type="range" min="{{min}}" max="{{max}}" step="{{step}}" value="{{score}}" onChange="{{onScore}}" style="width: 100%; height: 28px; accent-color: #C85A32; margin: 0">
+</section>
+</main>
+
+<footer style="position: absolute; left: 0; right: 0; bottom: 0; padding: 16px 20px 28px; background: #FAF5EE; border-top: 1px solid #EADBC8">
+<a href="Bitacora.dc.html" style="height: 56px; border-radius: 16px; background: #B24F2B; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 16px; font-weight: 800">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"></path></svg>
+Guardar en mi bitácora
+</a>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { acid: 3, picked: ['Frutos Rojos', 'Cítricos', 'Jazmín'], scale: 'sca', sca: 88.5, personal: 8.5 };
+  }
+  renderVals() {
+    const s = this.state;
+    const acidNames = ['Láctica · suave', 'Málica', 'Cítrica', 'Tartárica', 'Fosfórica · brillante'];
+    const chip = (on) => 'min-height: 44px; padding: 0 14px; border-radius: 22px; cursor: pointer; font-family: Manrope, system-ui, sans-serif; font-size: 14px; font-weight: ' + (on ? '800' : '600') + '; border: 1px solid ' + (on ? '#C85A32' : '#EADBC8') + '; background: ' + (on ? '#F8E6DC' : '#FAF5EE') + '; color: ' + (on ? '#8F3D1E' : '#3C2A21');
+    const labels = ['Jazmín', 'Cítricos', 'Frutos Rojos', 'Panela', 'Chocolate Negro', 'Caramelo', 'Nuez', 'Hibisco'];
+    const notes = labels.map((label) => {
+      const on = s.picked.indexOf(label) >= 0;
+      return { label, on: on ? 'true' : 'false', style: chip(on), pick: () => this.setState({ picked: on ? s.picked.filter((x) => x !== label) : s.picked.concat([label]) }) };
+    });
+    const sca = s.scale === 'sca';
+    const score = sca ? s.sca : s.personal;
+    let scoreLabel;
+    if (sca) scoreLabel = score >= 90 ? 'Excepcional' : score >= 85 ? 'Excelente' : score >= 80 ? 'Muy bueno' : 'Por debajo de especialidad';
+    else scoreLabel = 'de 10 · escala personal';
+    const seg = (on) => 'min-height: 36px; padding: 0 12px; border: 0; border-radius: 9px; cursor: pointer; font-family: Manrope, sans-serif; font-size: 13px; font-weight: 800; background: ' + (on ? '#FFFDF9' : 'transparent') + '; color: ' + (on ? '#2C1810' : '#7A6352') + (on ? '; box-shadow: 0 1px 3px rgba(60, 42, 33, 0.15)' : '');
+    return {
+      acid: s.acid,
+      acidLabel: acidNames[s.acid - 1],
+      onAcid: (e) => this.setState({ acid: Number(e.target.value) }),
+      notes,
+      noteCount: s.picked.length === 1 ? '1 nota' : s.picked.length + ' notas',
+      isSca: sca ? 'true' : 'false', isPersonal: sca ? 'false' : 'true',
+      scaStyle: seg(sca), personalStyle: seg(!sca),
+      toSca: () => this.setState({ scale: 'sca' }), toPersonal: () => this.setState({ scale: 'personal' }),
+      min: sca ? 70 : 1, max: sca ? 100 : 10, step: sca ? 0.25 : 0.5,
+      score, scoreText: sca ? score.toFixed(2) : score.toFixed(1), scoreLabel,
+      onScore: (e) => this.setState(sca ? { sca: Number(e.target.value) } : { personal: Number(e.target.value) })
+    };
+  }
+}
+</script>
+</body>
+</html>

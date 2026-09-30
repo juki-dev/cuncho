@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Catación · Paso 1 · Lugar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#FAF5EE;font-family:Manrope,system-ui,sans-serif;color:#3C2A21}
+a{color:#B24F2B}a:hover{color:#8F3D1E}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #FAF5EE; font-family: Manrope, system-ui, sans-serif; color: #3C2A21">
+
+<header style="padding: 24px 20px 0; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; gap: 12px">
+<a href="Acciones.dc.html" aria-label="Volver" style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 22px; border: 1px solid #EADBC8; background: #FFFDF9; display: flex; align-items: center; justify-content: center; color: #3C2A21">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"></path></svg>
+</a>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #7A6352">Paso 1 de 3 · Lugar</span>
+<h1 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 24px; font-weight: 700; color: #2C1810">¿Dónde estás catando?</h1>
+</div>
+</div>
+<div style="display: flex; gap: 6px" aria-hidden="true">
+<span style="flex-grow: 1; height: 4px; border-radius: 2px; background: #C85A32"></span>
+<span style="flex-grow: 1; height: 4px; border-radius: 2px; background: #EADBC8"></span>
+<span style="flex-grow: 1; height: 4px; border-radius: 2px; background: #EADBC8"></span>
+</div>
+</header>
+
+<main style="padding: 20px; display: flex; flex-direction: column; gap: 16px">
+<div style="background: #FFFDF9; border: 1px solid #EADBC8; border-radius: 20px; overflow: hidden">
+<div style="position: relative; height: 128px; background: #F3EBDF">
+<svg width="350" height="128" viewBox="0 0 350 128" style="position: absolute; left: 0; top: 0" aria-hidden="true">
+<rect x="220" y="14" width="96" height="60" rx="10" fill="#DFE4C8"></rect>
+<g stroke="#FFFDF9" stroke-width="5" fill="none"><path d="M0 30 L350 44"></path><path d="M70 0 L80 128"></path><path d="M270 0 L262 128"></path></g>
+<g stroke="#F4D9B8" stroke-width="10" fill="none"><path d="M0 92 L350 78"></path><path d="M170 0 L178 128"></path></g>
+</svg>
+<span style="position: absolute; left: 150px; top: 38px; width: 52px; height: 52px; border-radius: 26px; background: rgba(58, 124, 165, 0.16)"></span>
+<span style="position: absolute; left: 166px; top: 54px; width: 20px; height: 20px; border-radius: 10px; background: #3A7CA5; border: 3px solid #FFFFFF; box-sizing: border-box"></span>
+</div>
+<div style="padding: 14px 16px; display: flex; align-items: center; gap: 10px">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3A7CA5" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="7"></circle><circle cx="12" cy="12" r="2.5" fill="#3A7CA5"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path></svg>
+<span style="font-size: 13px; color: #5E4838">5.0689° N, 75.5174° O · precisión ±8 m</span>
+</div>
+</div>
+
+<h2 style="margin: 4px 0 0; font-size: 14px; font-weight: 800; color: #2C1810">Cafeterías cercanas</h2>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{places}}" as="p" hint-placeholder-count="3">
+<button type="button" onClick="{{p.pick}}" aria-pressed="{{p.on}}" style="{{p.style}}">
+<span style="display: flex; flex-direction: column; gap: 2px; align-items: flex-start; flex-grow: 1">
+<span style="font-size: 15px; font-weight: 800; color: #2C1810">{{p.name}}</span>
+<span style="font-size: 12px; color: #7A6352">{{p.meta}}</span>
+</span>
+<span style="font-size: 13px; font-weight: 700; color: #5E4838">{{p.dist}}</span>
+<span style="{{p.dot}}"></span>
+</button>
+</sc-for>
+</div>
+
+<button type="button" style="min-height: 52px; border-radius: 16px; border: 1.5px dashed #D9C3A8; background: transparent; color: #8F3D1E; font-family: Manrope, sans-serif; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+Registrar un lugar nuevo
+</button>
+</main>
+
+<footer style="position: absolute; left: 0; right: 0; bottom: 0; padding: 16px 20px 28px; background: #FAF5EE; border-top: 1px solid #EADBC8">
+<a href="Paso2.dc.html" style="height: 56px; border-radius: 16px; background: #B24F2B; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800">Continuar con {{selName}}</a>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { sel: 'origen' }; }
+  renderVals() {
+    const list = [
+      { id: 'origen', name: 'Origen Cafetería', meta: 'Detectada por GPS · 7 cataciones', dist: '40 m' },
+      { id: 'laureles', name: 'Café Laureles', meta: '12 cataciones', dist: '650 m' },
+      { id: 'mesa', name: 'La Mesa del Barista', meta: '5 cataciones', dist: '900 m' }
+    ];
+    const places = list.map((p) => {
+      const on = this.state.sel === p.id;
+      return Object.assign({}, p, {
+        on: on ? 'true' : 'false',
+        pick: () => this.setState({ sel: p.id }),
+        style: 'min-height: 64px; padding: 12px 16px; border-radius: 16px; display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; font-family: Manrope, sans-serif; background: ' + (on ? '#FBEFE8' : '#FFFDF9') + '; border: ' + (on ? '2px solid #C85A32' : '1px solid #EADBC8'),
+        dot: 'width: 20px; height: 20px; flex-shrink: 0; border-radius: 10px; box-sizing: border-box; border: ' + (on ? '6px solid #C85A32' : '2px solid #D9C3A8') + '; background: #FFFDF9'
+      });
+    });
+    const selName = list.find((p) => p.id === this.state.sel).name;
+    return { places, selName };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Cuncho · Bitácora</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#FAF5EE;font-family:Manrope,system-ui,sans-serif;color:#3C2A21}
+a{color:#B24F2B}a:hover{color:#8F3D1E}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #FAF5EE; font-family: Manrope, system-ui, sans-serif; color: #3C2A21">
+
+<header style="padding: 28px 20px 0; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #7A6352">Historial personal</span>
+<h1 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 30px; font-weight: 700; color: #2C1810">Mi bitácora</h1>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<div style="padding: 12px; border-radius: 16px; background: #FFFDF9; border: 1px solid #EADBC8; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 22px; font-weight: 800; color: #2C1810">4</span><span style="font-size: 11px; font-weight: 700; color: #7A6352">Cataciones</span></div>
+<div style="padding: 12px; border-radius: 16px; background: #FFFDF9; border: 1px solid #EADBC8; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 22px; font-weight: 800; color: #2C1810">87.75</span><span style="font-size: 11px; font-weight: 700; color: #7A6352">Promedio SCA</span></div>
+<div style="padding: 12px; border-radius: 16px; background: #FFFDF9; border: 1px solid #EADBC8; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 22px; font-weight: 800; color: #2C1810">4</span><span style="font-size: 11px; font-weight: 700; color: #7A6352">Cafeterías</span></div>
+</div>
+</header>
+
+<main style="padding: 16px 20px; display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{entries}}" as="e" hint-placeholder-count="4">
+<article style="padding: 14px 16px; background: #FFFDF9; border: 1px solid #EADBC8; border-radius: 18px; display: flex; gap: 14px; align-items: flex-start">
+<div style="width: 48px; height: 48px; flex-shrink: 0; border-radius: 24px; background: #3C2A21; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800">{{e.score}}</div>
+<div style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span style="font-size: 15px; font-weight: 800; color: #2C1810">{{e.place}}</span><span style="font-size: 12px; font-weight: 600; color: #7A6352">{{e.date}}</span></div>
+<span style="font-size: 13px; color: #5E4838">{{e.grain}}</span>
+<div style="display: flex; flex-wrap: wrap; gap: 6px; padding-top: 2px">
+<sc-for list="{{e.notes}}" as="n" hint-placeholder-count="3">
+<span style="padding: 3px 9px; border-radius: 10px; background: #F5EADF; color: #5E4838; font-size: 11px; font-weight: 700">{{n}}</span>
+</sc-for>
+</div>
+</div>
+</article>
+</sc-for>
+</main>
+
+<nav aria-label="Navegación principal" style="position: absolute; left: 0; right: 0; bottom: 0; height: 88px; background: #FFFDF9; border-top: 1px solid #EADBC8; display: flex; align-items: flex-start; justify-content: space-around; padding-top: 10px; box-sizing: border-box">
+<a href="Main.dc.html" style="width: 96px; height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #7A6352; font-size: 12px; font-weight: 600">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"></path><path d="M9 4v14M15 6v14"></path></svg>
+Explorar
+</a>
+<div style="width: 72px"></div>
+<a href="Bitacora.dc.html" aria-current="page" style="width: 96px; height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #B24F2B; font-size: 12px; font-weight: 800">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4z"></path><path d="M5 17a3 3 0 0 1 3-3h11"></path></svg>
+Bitácora
+</a>
+<a href="Acciones.dc.html" aria-label="Abrir acciones" style="position: absolute; left: 159px; top: -32px; width: 72px; height: 72px; border-radius: 36px; background: linear-gradient(135deg, #C85A32, #E07A5F); border: 4px solid #FFFDF9; box-sizing: border-box; display: flex; align-items: center; justify-content: center; color: #FFFFFF; box-shadow: 0 10px 22px rgba(200, 90, 50, 0.4)">
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+</a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      entries: [
+        { score: '92', place: 'Origen Cafetería', date: '28 sep', grain: 'Bourbon Rosado · Anaeróbico · Aeropress', notes: ['Frutos Rojos', 'Hibisco', 'Cítricos'] },
+        { score: '89', place: 'Café Laureles', date: '21 sep', grain: 'Geisha · Lavado · V60', notes: ['Jazmín', 'Bergamota', 'Durazno'] },
+        { score: '86', place: 'Tostadores del Cable', date: '14 sep', grain: 'Castillo · Honey · Chemex', notes: ['Panela', 'Caramelo', 'Naranja'] },
+        { score: '84', place: 'La Mesa del Barista', date: '6 sep', grain: 'Caturra · Natural · Espresso', notes: ['Chocolate Negro', 'Nuez'] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
