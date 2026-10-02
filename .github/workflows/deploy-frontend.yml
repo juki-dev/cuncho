@@ -69,13 +69,6 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-      # TEMPORAL (diagnóstico OIDC): imprime sub y aud del token. Borrar tras resolver.
-      - name: Depurar claims OIDC
-        run: |
-          t=$(curl -sH "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r .value)
-          p=$(echo "$t" | cut -d. -f2 | tr '_-' '/+'); while [ $(( ${#p} % 4 )) -ne 0 ]; do p="$p="; done
-          echo "$p" | base64 -d | jq '{sub, aud, iss, repository, environment, ref, job_workflow_ref}'
-
       # Acción de terceros con acceso a credenciales: fijada por SHA (v6.3.0).
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
         with:

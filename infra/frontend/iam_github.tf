@@ -36,7 +36,11 @@ data "aws_iam_policy_document" "deploy_trust" {
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.github_owner}/${var.github_repo}:environment:${var.github_environment}"]
+      values = compact([
+        "repo:${var.github_owner}/${var.github_repo}:environment:${var.github_environment}",
+        # Formato con IDs inmutables que GitHub emite hoy en el sub.
+        var.github_owner_id != "" && var.github_repo_id != "" ? "repo:${var.github_owner}@${var.github_owner_id}/${var.github_repo}@${var.github_repo_id}:environment:${var.github_environment}" : "",
+      ])
     }
   }
 }

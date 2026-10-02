@@ -1,6 +1,10 @@
 # Copia a terraform.tfvars (ignorado por git) y ajusta.
 github_owner = "TU_USUARIO_O_ORG"
 github_repo  = "TU_REPO"
+# IDs numéricos (GitHub los incluye en el sub del token OIDC). Míralos en el paso de depuración o con:
+#   gh api repos/OWNER/REPO --jq '.owner.id, .id'
+github_owner_id = "TU_OWNER_ID"
+github_repo_id  = "TU_REPO_ID"
 
 # Opcionales (valores por defecto mostrados):
 # aws_region                  = "us-east-1"

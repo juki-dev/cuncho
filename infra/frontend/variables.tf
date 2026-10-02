@@ -38,6 +38,18 @@ variable "github_repo" {
   type        = string
 }
 
+variable "github_owner_id" {
+  description = "ID numérico del dueño en GitHub. GitHub ya emite el sub como repo:<owner>@<id>/<repo>@<id>:...; vacío = solo el formato antiguo."
+  type        = string
+  default     = ""
+}
+
+variable "github_repo_id" {
+  description = "ID numérico del repositorio en GitHub (ver github_owner_id)."
+  type        = string
+  default     = ""
+}
+
 variable "github_environment" {
   description = "Environment de GitHub Actions al que se limita la confianza del rol OIDC."
   type        = string
