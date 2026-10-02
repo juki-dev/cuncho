@@ -1,0 +1,11 @@
+# Copia a terraform.tfvars (ignorado por git) y ajusta.
+github_owner = "TU_USUARIO_O_ORG"
+github_repo  = "TU_REPO"
+
+# Opcionales (valores por defecto mostrados):
+# aws_region                  = "us-east-1"
+# root_domain                 = "jukidev.com"
+# subdomain                   = "cuncho"
+# api_origin                  = "https://cuncho-api.jukidev.com"
+# github_environment          = "production"
+# create_github_oidc_provider = true   # false si la cuenta ya tiene el proveedor de GitHub

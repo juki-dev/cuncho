@@ -1,0 +1,79 @@
+name: Deploy frontend
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "apps/frontend/**"
+      - ".github/workflows/deploy-frontend.yml"
+      - ".github/workflows/ci-frontend.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Un despliegue a la vez por ambiente y nunca se cancela uno en curso.
+concurrency:
+  group: deploy-frontend-production
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: apps/frontend
+
+
+jobs:
+  # No se despliega código que no pasó CI. Los e2e usan MSW, no dependen de la API.
+  ci:
+    uses: ./.github/workflows/ci-frontend.yml
+
+  deploy:
+    name: Build y publicación
+    needs: ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production # aprobación requerida y variables se configuran en GitHub
+    permissions:
+      contents: read
+      id-token: write # solo este job puede pedir el token OIDC
+    env:
+      # VITE_* se incrustan al compilar: un build por ambiente. No son secretos
+      # (VITE_CARTO_KEY viaja en la URL de los tiles; se restringe por dominio en CARTO).
+      VITE_API_URL: ${{ vars.VITE_API_URL }}
+      VITE_API_MOCKS: "false" # siempre false en producción
+      VITE_MAP_DEFAULT_CENTER: ${{ vars.VITE_MAP_DEFAULT_CENTER }}
+      VITE_CARTO_KEY: ${{ vars.VITE_CARTO_KEY }}
+      BUCKET: ${{ vars.S3_BUCKET }}
+      CF_ID: ${{ vars.CF_DISTRIBUTION_ID }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Verificar variables del environment
+        env:
+          AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        run: |
+          faltan=0
+          for v in AWS_ROLE_ARN AWS_REGION BUCKET CF_ID VITE_API_URL VITE_MAP_DEFAULT_CENTER VITE_CARTO_KEY; do
+            if [ -z "${!v}" ]; then echo "::error::Falta la variable del environment para $v"; faltan=1; fi
+          done
+          exit $faltan
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: apps/frontend/.nvmrc
+          cache: npm
+          cache-dependency-path: apps/frontend/package-lock.json
+      - run: npm ci
+      - run: npm run build
+
+      # Acción de terceros con acceso a credenciales: fijada por SHA (v6.3.0).
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Publicar en S3 e invalidar CloudFront
+        run: ./scripts/deploy.sh

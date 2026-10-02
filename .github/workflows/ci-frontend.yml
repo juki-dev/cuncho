@@ -1,0 +1,87 @@
+name: CI frontend
+
+# No se dispara en push a master: deploy-frontend.yml invoca este mismo workflow (workflow_call)
+# antes de desplegar, así que correrlo también por push duplicaría el trabajo.
+on:
+  pull_request:
+    paths:
+      - "apps/frontend/**"
+      - ".github/workflows/ci-frontend.yml"
+  workflow_call:
+
+permissions:
+  contents: read
+
+# Cancela ejecuciones previas solo en PRs; cuando lo llama el despliegue (event_name = push) no cancela.
+concurrency:
+  group: ci-frontend-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+defaults:
+  run:
+    working-directory: apps/frontend
+
+
+jobs:
+  check:
+    name: Lint, tipos, tests y build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: apps/frontend/.nvmrc
+          cache: npm
+          cache-dependency-path: apps/frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  e2e:
+    name: Playwright (móvil y escritorio)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: apps/frontend/.nvmrc
+          cache: npm
+          cache-dependency-path: apps/frontend/package-lock.json
+      - run: npm ci
+
+      # La clave incluye el lock: cambia al actualizar @playwright/test (y con él el navegador).
+      - name: Caché de navegadores de Playwright
+        id: pw-cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('apps/frontend/package-lock.json') }}
+      - name: Instalar Chromium y dependencias del sistema
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+      # Con caché solo falta el sistema (las libs no viven en ~/.cache).
+      - name: Instalar solo dependencias del sistema
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      # Los e2e corren contra `npm run dev` con MSW (.env.development), no contra una API real.
+      - run: npm run test:e2e
+
+      - name: Subir reporte y trazas si falla
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-${{ github.run_id }}
+          path: |
+            apps/frontend/test-results/
+            apps/frontend/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
