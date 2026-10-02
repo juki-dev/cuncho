@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ---------- deps: dependencias completas para compilar ----------
-FROM node:20-bookworm-slim AS deps
+FROM node:26-bookworm-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
@@ -30,7 +30,7 @@ COPY src ./src
 RUN npm run build && npm prune --omit=dev
 
 # ---------- runtime ----------
-FROM node:20-bookworm-slim AS runtime
+FROM node:26-bookworm-slim AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=build --chown=node:node /app/package.json ./
