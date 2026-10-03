@@ -42,6 +42,9 @@ export class EnvironmentVariables extends DatabaseEnv {
   /** Lista separada por comas. */
   @IsString() @IsNotEmpty() CORS_ORIGINS!: string;
 
+  /** Saltos de proxy de confianza para `X-Forwarded-For` (0 = ninguno; 1 = Caddy delante de la API). */
+  @IsOptional() @Type(() => Number) @IsInt() @Min(0) @Max(5) TRUST_PROXY: number = 0;
+
   @IsString() @MinLength(32) JWT_ACCESS_SECRET!: string;
   @Type(() => Number) @IsInt() @Min(60) JWT_ACCESS_TTL_SECONDS!: number;
   @Type(() => Number) @IsInt() @Min(3600) JWT_REFRESH_TTL_SECONDS!: number;

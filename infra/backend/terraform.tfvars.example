@@ -1,0 +1,11 @@
+# Copia a terraform.tfvars (ignorado por git) y ajusta.
+deploy_ssh_public_key = "ssh-ed25519 AAAA... cuncho-deploy"
+
+# Opcionales (valores por defecto mostrados):
+# aws_region               = "us-east-1"
+# instance_bundle_id       = "micro_3_0"   # 1 GB. Para escalar: small_3_0 (2 GB), medium_3_0 (4 GB)
+# data_disk_size_gb        = 20
+# root_domain              = "jukidev.com"
+# api_subdomain            = "cuncho-api"
+# lightsail_key_pair_name  = null
+# backup_retention_days    = 30

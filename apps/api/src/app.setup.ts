@@ -1,4 +1,5 @@
 import { INestApplication, RequestMethod } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { Logger } from 'nestjs-pino';
@@ -8,9 +9,11 @@ import { createValidationPipe } from './shared/http';
 /** Configuración HTTP común a main.ts y a los tests e2e. */
 export function configureApp(app: INestApplication): void {
   const config = app.get(TypedConfigService);
-  const { globalPrefix, swaggerEnabled } = config.get('app');
+  const { globalPrefix, swaggerEnabled, trustProxy } = config.get('app');
 
   app.useLogger(app.get(Logger));
+  // Detrás de Caddy: sin esto el throttler vería la IP del proxy para todos los clientes.
+  (app as NestExpressApplication).set('trust proxy', trustProxy);
   app.setGlobalPrefix(globalPrefix, { exclude: [{ path: 'health', method: RequestMethod.GET }] });
   app.useGlobalPipes(createValidationPipe());
   app.use(helmet());

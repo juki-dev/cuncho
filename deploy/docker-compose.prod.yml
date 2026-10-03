@@ -1,0 +1,123 @@
+# Producción (Lightsail, 1 GB de RAM). Vive en /opt/cuncho, que es el disco de datos.
+# Los comandos se corren con las dos env-files (lo hacen deploy.sh y bootstrap):
+#   docker compose --env-file .env --env-file .tag.env -f docker-compose.prod.yml <cmd>
+# Solo caddy publica puertos. Los límites de memoria suman ~770 MB; el resto es SO + swap.
+name: cuncho
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:?}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?}
+      POSTGRES_DB: ${DB_NAME:?}
+    # Ajustado para ~384 MB. Si escalas el servidor, sube shared_buffers y mem_limit.
+    command:
+      - postgres
+      - -c
+      - shared_buffers=96MB
+      - -c
+      - effective_cache_size=256MB
+      - -c
+      - work_mem=4MB
+      - -c
+      - maintenance_work_mem=48MB
+      - -c
+      - max_connections=30
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    mem_limit: ${DB_MEM_LIMIT:-384m}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    logging: *logging
+
+  # Un solo uso: `docker compose run --rm migrations` (no arranca con `up`).
+  migrations:
+    image: ghcr.io/juki-dev/cuncho-api:${API_TAG:?}
+    profiles: ["tools"]
+    restart: "no"
+    command: ["npm", "run", "migration:run:prod"]
+    environment:
+      NODE_ENV: production
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_USER: ${DB_USER:?}
+      DB_PASSWORD: ${DB_PASSWORD:?}
+      DB_NAME: ${DB_NAME:?}
+      DB_SSL: "false"
+    depends_on:
+      db:
+        condition: service_healthy
+    mem_limit: 256m
+    logging: *logging
+
+  api:
+    image: ghcr.io/juki-dev/cuncho-api:${API_TAG:?}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NODE_OPTIONS: --max-old-space-size=192
+      PORT: "3000"
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      SWAGGER_ENABLED: "false"
+      TRUST_PROXY: "1" # Caddy es el único salto delante de la API
+      CORS_ORIGINS: ${CORS_ORIGINS:?}
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_USER: ${DB_USER:?}
+      DB_PASSWORD: ${DB_PASSWORD:?}
+      DB_NAME: ${DB_NAME:?}
+      DB_SSL: "false"
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?}
+      JWT_ACCESS_TTL_SECONDS: ${JWT_ACCESS_TTL_SECONDS:-900}
+      JWT_REFRESH_TTL_SECONDS: ${JWT_REFRESH_TTL_SECONDS:-2592000}
+      THROTTLE_TTL_MS: ${THROTTLE_TTL_MS:-60000}
+      THROTTLE_LIMIT: ${THROTTLE_LIMIT:-120}
+      THROTTLE_AUTH_LIMIT: ${THROTTLE_AUTH_LIMIT:-10}
+      RECOMMENDATION_DEFAULT_RADIUS_KM: ${RECOMMENDATION_DEFAULT_RADIUS_KM:-2.5}
+      RECOMMENDATION_MAX_RADIUS_KM: ${RECOMMENDATION_MAX_RADIUS_KM:-25}
+      RECOMMENDATION_WEIGHT_JACCARD: ${RECOMMENDATION_WEIGHT_JACCARD:-0.60}
+      RECOMMENDATION_WEIGHT_DISTANCE: ${RECOMMENDATION_WEIGHT_DISTANCE:-0.25}
+      RECOMMENDATION_WEIGHT_SCORE: ${RECOMMENDATION_WEIGHT_SCORE:-0.15}
+      RECOMMENDATION_MAX_RESULTS: ${RECOMMENDATION_MAX_RESULTS:-20}
+    depends_on:
+      db:
+        condition: service_healthy
+    mem_limit: ${API_MEM_LIMIT:-320m}
+    # El HEALTHCHECK de la imagen ya consulta /health; se repite para fijar tiempos de arranque.
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 4s
+      start_period: 30s
+      retries: 3
+    logging: *logging
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      API_DOMAIN: ${API_DOMAIN:-cuncho-api.jukidev.com}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # En el disco de datos: los certificados sobreviven a un reemplazo del servidor
+      # (evita los límites de emisión de Let's Encrypt).
+      - ./data/caddy-data:/data
+      - ./data/caddy-config:/config
+    depends_on:
+      - api
+    mem_limit: 64m
+    logging: *logging

@@ -30,6 +30,12 @@ describe('configuración', () => {
     expect(cfg.throttle.authLimit).toBe(10);
   });
 
+  it('TRUST_PROXY es 0 por defecto y acepta saltos de proxy', () => {
+    expect(buildConfig(validateEnv<EnvironmentVariables>(baseEnv)).app.trustProxy).toBe(0);
+    expect(buildConfig(validateEnv<EnvironmentVariables>({ ...baseEnv, TRUST_PROXY: '1' })).app.trustProxy).toBe(1);
+    expect(() => validateEnv({ ...baseEnv, TRUST_PROXY: '-1' })).toThrow(/TRUST_PROXY/);
+  });
+
   it.each(['DB_HOST', 'JWT_ACCESS_SECRET', 'CORS_ORIGINS', 'RECOMMENDATION_WEIGHT_JACCARD'])(
     'falla si falta %s',
     (key) => {

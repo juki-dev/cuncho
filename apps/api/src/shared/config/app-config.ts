@@ -6,6 +6,7 @@ export interface AppConfig {
     port: number;
     logLevel: string;
     swaggerEnabled: boolean;
+    trustProxy: number;
     globalPrefix: string;
   };
   db: {
@@ -50,6 +51,7 @@ export function buildConfig(env: EnvironmentVariables): AppConfig {
       port: env.PORT,
       logLevel: env.LOG_LEVEL,
       swaggerEnabled: env.SWAGGER_ENABLED,
+      trustProxy: env.TRUST_PROXY,
       globalPrefix: 'api/v1',
     },
     db: {

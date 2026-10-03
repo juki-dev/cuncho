@@ -1,0 +1,13 @@
+{$API_DOMAIN:cuncho-api.jukidev.com} {
+	encode zstd gzip
+
+	# Caddy fija X-Forwarded-For con la IP real del cliente (la API usa TRUST_PROXY=1).
+	reverse_proxy api:3000
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		-Server
+	}
+}

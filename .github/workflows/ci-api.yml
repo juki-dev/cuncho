@@ -1,0 +1,44 @@
+name: CI API
+
+# No se dispara en push a master: deploy-api.yml invoca este mismo workflow (workflow_call)
+# antes de desplegar, así que correrlo también por push duplicaría el trabajo.
+on:
+  pull_request:
+    paths:
+      - "apps/api/**"
+      - ".github/workflows/ci-api.yml"
+  workflow_call:
+
+permissions:
+  contents: read
+
+# Cancela ejecuciones previas solo en PRs; cuando lo llama el despliegue (event_name = push) no cancela.
+concurrency:
+  group: ci-api-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+defaults:
+  run:
+    working-directory: apps/api
+
+jobs:
+  check:
+    name: Lint, tipos, tests, e2e y build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: apps/api/.nvmrc
+          cache: npm
+          cache-dependency-path: apps/api/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      # Testcontainers levanta PostGIS con el Docker del runner.
+      - run: npm run test:e2e
+      - run: npm run build
