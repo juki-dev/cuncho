@@ -82,17 +82,3 @@ export interface LugarCercano extends Lugar {
 
 /** [oeste, sur, este, norte] en grados. */
 export type BBox = [number, number, number, number]
-
-export interface Usuario {
-  id: string
-  email: string
-  nombre: string
-}
-
-/** Respuesta de /auth/register, /auth/login y /auth/refresh. */
-export interface Sesion {
-  access_token: string
-  refresh_token: string
-  expires_in: number
-  usuario: Usuario
-}

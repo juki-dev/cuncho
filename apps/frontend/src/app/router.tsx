@@ -8,33 +8,24 @@ import { Paso1Lugar } from '../features/catacion/Paso1Lugar'
 import { Paso2Grano } from '../features/catacion/Paso2Grano'
 import { Paso3Sensorial } from '../features/catacion/Paso3Sensorial'
 import { RecomendacionPage } from '../features/recomendacion/RecomendacionPage'
-import { AccesoPage } from '../features/auth/AccesoPage'
-import { RequireAuth } from '../features/auth/RequireAuth'
 
 export const routes: RouteObject[] = [
   {
     element: <RootLayout />,
     errorElement: <NotFound />,
     children: [
-      { path: '/acceso', element: <AccesoPage /> },
       {
         element: <TabsLayout />,
         children: [
           { path: '/', element: <ExplorarPage /> },
-          // El mapa es público; el resto necesita cuenta.
-          { element: <RequireAuth />, children: [{ path: '/bitacora', element: <BitacoraPage /> }] },
+          { path: '/bitacora', element: <BitacoraPage /> },
         ],
       },
-      {
-        element: <RequireAuth />,
-        children: [
-          { path: '/catar', element: <Navigate to="/catar/lugar" replace /> },
-          { path: '/catar/lugar', element: <Paso1Lugar /> },
-          { path: '/catar/grano', element: <Paso2Grano /> },
-          { path: '/catar/sensorial', element: <Paso3Sensorial /> },
-          { path: '/recomendar', element: <RecomendacionPage /> },
-        ],
-      },
+      { path: '/catar', element: <Navigate to="/catar/lugar" replace /> },
+      { path: '/catar/lugar', element: <Paso1Lugar /> },
+      { path: '/catar/grano', element: <Paso2Grano /> },
+      { path: '/catar/sensorial', element: <Paso3Sensorial /> },
+      { path: '/recomendar', element: <RecomendacionPage /> },
       { path: '*', element: <NotFound /> },
     ],
   },

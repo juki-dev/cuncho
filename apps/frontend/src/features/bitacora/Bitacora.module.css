@@ -87,17 +87,3 @@
   font-size: 14px;
   color: var(--text-2);
 }
-
-.salir {
-  align-self: flex-start;
-  min-height: 44px;
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--accent-ink);
-  text-decoration: underline;
-  cursor: pointer;
-}
