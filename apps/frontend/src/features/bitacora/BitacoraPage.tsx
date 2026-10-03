@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
+import { api } from '../../lib/api/client'
 import { useMisCataciones, usePendientes } from '../../lib/api/queries'
+import { useSesion } from '../../lib/auth/session'
 import { IconCerrar } from '../../components/icons'
 import { BitacoraList, type EntradaBitacora } from './BitacoraList'
 import { Stats } from './Stats'
@@ -21,6 +24,8 @@ export function BitacoraPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const cataciones = useMisCataciones()
+  const qc = useQueryClient()
+  const usuario = useSesion((st) => st.usuario)
   const pendientes = usePendientes()
   const [aviso, setAviso] = useState<EstadoBitacora['guardada']>(
     () => (location.state as EstadoBitacora | null)?.guardada,
@@ -37,6 +42,13 @@ export function BitacoraPage() {
     return () => window.clearTimeout(id)
   }, [aviso])
 
+  const cerrarSesion = () => {
+    const { refreshToken, limpiar } = useSesion.getState()
+    limpiar()
+    qc.clear()
+    if (refreshToken) void api.cerrarSesion(refreshToken).catch(() => {})
+  }
+
   const entradas: EntradaBitacora[] = [
     ...(pendientes.data ?? []).map((p) => ({ id: p.id, pendiente: true, catacion: p.payload })),
     ...(cataciones.data ?? [])
@@ -52,6 +64,11 @@ export function BitacoraPage() {
         <div className={s.titles}>
           <span className={s.eyebrow}>Historial personal</span>
           <h1 className={s.title}>Mi bitácora</h1>
+          {usuario && (
+            <button type="button" className={s.salir} onClick={cerrarSesion}>
+              {usuario.nombre} · Cerrar sesión
+            </button>
+          )}
         </div>
         <Stats {...stats} />
       </header>

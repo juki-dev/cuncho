@@ -25,7 +25,7 @@ export function RecomendacionPage() {
   const origen = geo.posicion ?? (sinGps ? CENTRO_POR_DEFECTO : null)
   const cercanos = useLugaresCercanos(origen, RADIO_RECOMENDACION_KM)
 
-  // SUPUESTO: no hay endpoint de recomendación; se rankea en el cliente.
+  // Se rankea en el cliente sobre /places/nearby (la API también ofrece GET /recommendations).
   const ranking = useMemo(
     () => (origen && cercanos.data ? rankear(cercanos.data, origen, pedidos, { radioKm: RADIO_RECOMENDACION_KM }) : []),
     [cercanos.data, origen, pedidos],

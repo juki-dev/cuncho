@@ -21,7 +21,8 @@ export async function listarPendientes(): Promise<Pendiente[]> {
 export async function encolar(payload: NuevaCatacion): Promise<Pendiente> {
   const item: Pendiente = {
     id: `pend_${crypto.randomUUID()}`,
-    payload,
+    // El UUID de la catación viaja con ella: si el envío se repite, el servidor no la duplica.
+    payload: { ...payload, id: payload.id ?? crypto.randomUUID() },
     encolado_en: new Date().toISOString(),
     intentos: 0,
   }
@@ -80,10 +81,11 @@ export async function guardarCatacion(
   if (typeof navigator !== 'undefined' && navigator.onLine === false) {
     return { estado: 'pendiente', pendiente: await encolar(payload) }
   }
+  const conId = { ...payload, id: payload.id ?? crypto.randomUUID() }
   try {
-    return { estado: 'enviada', catacion: await enviar(payload) }
+    return { estado: 'enviada', catacion: await enviar(conId) }
   } catch (e) {
-    if (e instanceof NetworkError) return { estado: 'pendiente', pendiente: await encolar(payload) }
+    if (e instanceof NetworkError) return { estado: 'pendiente', pendiente: await encolar(conId) }
     throw e
   }
 }

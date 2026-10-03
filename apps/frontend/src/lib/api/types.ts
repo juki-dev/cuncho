@@ -1,9 +1,7 @@
 /**
- * Tipos del dominio, derivados del esquema JSON de CLAUDE.md.
- *
- * SUPUESTO: todavía no existe contrato de la API Nest.js. Los tipos marcados
- * con "SUPUESTO" (Lugar, LugarCercano, NuevaCatacion) son propuestas del
- * frontend y deben validarse con quien lleve el backend.
+ * Tipos del dominio, derivados del esquema JSON de CLAUDE.md y del contrato real de
+ * la API Nest.js (Swagger en /docs del entorno local). Las respuestas se adaptan en
+ * lib/api/client.ts: la UI conserva sus nombres (p. ej. `distancia_km`).
  */
 
 export type Proceso = 'Lavado' | 'Natural' | 'Honey' | 'Anaeróbico'
@@ -49,19 +47,21 @@ export interface Catacion {
 }
 
 /**
- * SUPUESTO: cuerpo de POST /cataciones. Si `lugar.id` no viene, el backend
- * crea el lugar nuevo con nombre y coordenadas.
+ * Catación a registrar. Si `lugar.id` no viene, el cliente crea primero el lugar
+ * (POST /places) y luego la catación (POST /tastings). `id` es un UUID generado en
+ * el cliente: hace idempotentes los reintentos (cola sin conexión).
  */
 export interface NuevaCatacion {
+  id?: string
   creado_en: string
   lugar: LugarRef | (Coordenadas & { id?: undefined; nombre: string })
   grano: Grano
   sensorial: Sensorial
 }
 
-/** SUPUESTO: lugar agregado que devuelve GET /lugares. */
+/** Lugar agregado que devuelve GET /places (pines del mapa). */
 export interface Lugar extends LugarRef {
-  /** Promedio SCA de las cataciones del lugar; null si no tiene. */
+  /** Promedio normalizado 0–100 de sus cataciones; null si no tiene. */
   puntaje_promedio: number | null
   total_cataciones: number
   /** Descriptores agregados de todas sus cataciones (B en Jaccard). */
@@ -75,10 +75,24 @@ export interface Lugar extends LugarRef {
   } | null
 }
 
-/** SUPUESTO: GET /lugares/cercanos agrega la distancia calculada en el servidor. */
+/** GET /places/nearby agrega la distancia calculada en el servidor (el cliente la pasa a km). */
 export interface LugarCercano extends Lugar {
   distancia_km: number
 }
 
 /** [oeste, sur, este, norte] en grados. */
 export type BBox = [number, number, number, number]
+
+export interface Usuario {
+  id: string
+  email: string
+  nombre: string
+}
+
+/** Respuesta de /auth/register, /auth/login y /auth/refresh. */
+export interface Sesion {
+  access_token: string
+  refresh_token: string
+  expires_in: number
+  usuario: Usuario
+}
