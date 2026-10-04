@@ -14,3 +14,6 @@ terraform.tfvars
 *.auto.tfvars
 crash.log
 *.tfplan
+
+# Credenciales OAuth de Google descargadas de la consola (nunca al repo)
+client_secret*.json
