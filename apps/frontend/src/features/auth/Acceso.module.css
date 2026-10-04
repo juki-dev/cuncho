@@ -47,3 +47,20 @@
 .field input:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 1px; }
 .error { margin: 0; font-size: 14px; font-weight: 600; color: #9B2C1C; }
 .volver { align-self: center; font-size: 14px; font-weight: 600; color: var(--accent-ink); }
+
+.separador { margin: -4px 0; text-align: center; font-size: 13px; color: var(--text-3); }
+.google {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border-2);
+  background: var(--surface);
+  font: inherit;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+}
+.google:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; }

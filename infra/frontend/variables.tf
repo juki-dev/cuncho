@@ -22,6 +22,12 @@ variable "api_origin" {
   default     = "https://cuncho-api.jukidev.com"
 }
 
+variable "extra_connect_src" {
+  description = "Orígenes adicionales permitidos en connect-src de la CSP (p. ej. el dominio de Cognito para el canje del código de Google)."
+  type        = list(string)
+  default     = []
+}
+
 variable "bucket_name" {
   description = "Nombre del bucket. Si es null se usa cuncho-frontend-<id de cuenta> (los nombres son únicos globalmente)."
   type        = string

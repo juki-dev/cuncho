@@ -10,7 +10,7 @@ export interface User {
 
 /** Solo para el dominio auth: incluye el hash de la contraseña. */
 export interface UserWithCredentials extends User {
-  passwordHash: string;
+  passwordHash: string | null;
 }
 
 export class EmailAlreadyRegisteredError extends Error {

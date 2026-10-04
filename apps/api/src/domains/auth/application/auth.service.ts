@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import * as argon2 from 'argon2';
@@ -15,6 +15,7 @@ import {
   secretMatches,
 } from '../domain/refresh-token';
 import { RefreshTokenEntity } from '../infrastructure/refresh-token.entity';
+import { COGNITO_VERIFIER, CognitoVerifier } from '../infrastructure/cognito-verifier';
 import { AccessTokenPayload } from '../infrastructure/jwt.strategy';
 
 const INVALID_CREDENTIALS = 'Correo o contraseña incorrectos';
@@ -32,6 +33,7 @@ export class AuthService {
     private readonly config: TypedConfigService,
     @InjectRepository(RefreshTokenEntity) private readonly tokens: Repository<RefreshTokenEntity>,
     @InjectDataSource() private readonly dataSource: DataSource,
+    @Inject(COGNITO_VERIFIER) private readonly cognito: CognitoVerifier,
   ) {}
 
   async register(input: { email: string; password: string; nombre: string }): Promise<AuthTokensDto> {
@@ -47,7 +49,7 @@ export class AuthService {
 
   async login(email: string, password: string): Promise<AuthTokensDto> {
     const user = await this.users.findWithCredentialsByEmail(email);
-    if (!user) {
+    if (!user || !user.passwordHash) {
       this.dummyHash ??= argon2.hash('timing-equalizer', { type: argon2.argon2id });
       await argon2.verify(await this.dummyHash, password).catch(() => false);
       throw new UnauthorizedException(INVALID_CREDENTIALS);
@@ -55,6 +57,23 @@ export class AuthService {
     const ok = await argon2.verify(user.passwordHash, password).catch(() => false);
     if (!ok) throw new UnauthorizedException(INVALID_CREDENTIALS);
     return this.issueTokens(user, randomUUID());
+  }
+
+  /** Inicio de sesión con Google: valida el ID token de Cognito y emite los tokens propios de la API. */
+  async loginWithCognito(idToken: string): Promise<AuthTokensDto> {
+    if (!this.cognito.enabled) throw new NotFoundException('Inicio de sesión con Google no disponible');
+    const identity = await this.cognito.verify(idToken);
+    try {
+      const user = await this.users.findOrCreateByCognito({
+        sub: identity.sub,
+        email: identity.email,
+        displayName: identity.name,
+      });
+      return this.issueTokens(user, randomUUID());
+    } catch (e) {
+      if (e instanceof EmailAlreadyRegisteredError) throw new ConflictException(e.message);
+      throw e;
+    }
   }
 
   /** Rota el refresh token. Reutilizar uno ya rotado revoca toda la familia. */

@@ -8,8 +8,12 @@ import { configureApp } from '../../src/app.setup';
 
 export const API = '/api/v1';
 
-export async function createTestApp(): Promise<INestApplication<App>> {
-  const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
+export async function createTestApp(
+  configure?: (builder: ReturnType<typeof Test.createTestingModule>) => void,
+): Promise<INestApplication<App>> {
+  const builder = Test.createTestingModule({ imports: [AppModule] });
+  configure?.(builder);
+  const moduleRef = await builder.compile();
   const app = moduleRef.createNestApplication<INestApplication<App>>({ bufferLogs: true });
   configureApp(app);
   await app.init();

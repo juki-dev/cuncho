@@ -22,6 +22,8 @@ export interface AppConfig {
     accessTtlSeconds: number;
     refreshTtlSeconds: number;
   };
+  /** null = inicio de sesión con Cognito desactivado. */
+  cognito: { issuer: string; clientId: string } | null;
   cors: { origins: string[] };
   throttle: { ttlMs: number; limit: number; authLimit: number };
   recommendation: {
@@ -30,6 +32,18 @@ export interface AppConfig {
     weights: { jaccard: number; distance: number; score: number };
     maxResults: number;
   };
+}
+
+function cognitoConfig(env: EnvironmentVariables): AppConfig['cognito'] {
+  const poolId = env.COGNITO_USER_POOL_ID;
+  const clientId = env.COGNITO_APP_CLIENT_ID;
+  if (!poolId && !clientId) return null;
+  if (!poolId || !clientId) {
+    throw new Error('Configuración inválida: COGNITO_USER_POOL_ID y COGNITO_APP_CLIENT_ID deben definirse juntas');
+  }
+  // El id del pool lleva la región: us-east-1_AbCdEf → us-east-1.
+  const region = poolId.split('_')[0];
+  return { issuer: `https://cognito-idp.${region}.amazonaws.com/${poolId}`, clientId };
 }
 
 export function buildConfig(env: EnvironmentVariables): AppConfig {
@@ -67,6 +81,7 @@ export function buildConfig(env: EnvironmentVariables): AppConfig {
       accessTtlSeconds: env.JWT_ACCESS_TTL_SECONDS,
       refreshTtlSeconds: env.JWT_REFRESH_TTL_SECONDS,
     },
+    cognito: cognitoConfig(env),
     cors: {
       origins: env.CORS_ORIGINS.split(',')
         .map((o) => o.trim())

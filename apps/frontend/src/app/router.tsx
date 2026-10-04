@@ -9,6 +9,7 @@ import { Paso2Grano } from '../features/catacion/Paso2Grano'
 import { Paso3Sensorial } from '../features/catacion/Paso3Sensorial'
 import { RecomendacionPage } from '../features/recomendacion/RecomendacionPage'
 import { AccesoPage } from '../features/auth/AccesoPage'
+import { GoogleCallbackPage } from '../features/auth/GoogleCallbackPage'
 import { RequireAuth } from '../features/auth/RequireAuth'
 
 export const routes: RouteObject[] = [
@@ -17,6 +18,7 @@ export const routes: RouteObject[] = [
     errorElement: <NotFound />,
     children: [
       { path: '/acceso', element: <AccesoPage /> },
+      { path: '/auth/callback', element: <GoogleCallbackPage /> },
       {
         element: <TabsLayout />,
         children: [

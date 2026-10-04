@@ -209,6 +209,10 @@ export const api = {
   iniciarSesion: (datos: { email: string; password: string }) =>
     request<Sesion>('/auth/login', { method: 'POST', body: JSON.stringify(datos), auth: false }),
 
+  /** Canjea el ID token de Cognito (Google) por los tokens de la API. */
+  iniciarConGoogle: (idToken: string) =>
+    request<Sesion>('/auth/cognito', { method: 'POST', body: JSON.stringify({ id_token: idToken }), auth: false }),
+
   cerrarSesion: (refreshToken: string) =>
     request<void>('/auth/logout', { method: 'POST', body: JSON.stringify({ refresh_token: refreshToken }), auth: false }),
 }

@@ -1,0 +1,4 @@
+# Copia a terraform.tfvars (ignorado por git).
+google_client_id     = "XXXXXXXX.apps.googleusercontent.com"
+google_client_secret = "GOCSPX-..."
+# domain_prefix = "cuncho-992382630799"

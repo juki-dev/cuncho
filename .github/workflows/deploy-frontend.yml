@@ -43,6 +43,9 @@ jobs:
       VITE_API_MOCKS: "false" # siempre false en producción
       VITE_MAP_DEFAULT_CENTER: ${{ vars.VITE_MAP_DEFAULT_CENTER }}
       VITE_CARTO_KEY: ${{ vars.VITE_CARTO_KEY }}
+      # Opcionales: sin ellos no se muestra el botón de Google. Salidas de infra/auth.
+      VITE_COGNITO_DOMAIN: ${{ vars.VITE_COGNITO_DOMAIN }}
+      VITE_COGNITO_CLIENT_ID: ${{ vars.VITE_COGNITO_CLIENT_ID }}
       BUCKET: ${{ vars.S3_BUCKET }}
       CF_ID: ${{ vars.CF_DISTRIBUTION_ID }}
     steps:

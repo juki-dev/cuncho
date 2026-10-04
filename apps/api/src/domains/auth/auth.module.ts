@@ -6,6 +6,7 @@ import { TypedConfigService } from '../../shared/config';
 import { UsersModule } from '../users';
 import { AuthController } from './api/auth.controller';
 import { AuthService } from './application/auth.service';
+import { COGNITO_VERIFIER, JoseCognitoVerifier } from './infrastructure/cognito-verifier';
 import { JwtStrategy } from './infrastructure/jwt.strategy';
 import { RefreshTokenEntity } from './infrastructure/refresh-token.entity';
 
@@ -23,6 +24,6 @@ import { RefreshTokenEntity } from './infrastructure/refresh-token.entity';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, { provide: COGNITO_VERIFIER, useClass: JoseCognitoVerifier }],
 })
 export class AuthModule {}

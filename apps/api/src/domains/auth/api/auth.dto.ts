@@ -33,6 +33,14 @@ export class LoginDto {
   password!: string;
 }
 
+export class CognitoLoginDto {
+  @ApiProperty({ description: 'ID token que Cognito entrega tras el inicio de sesión con Google' })
+  @IsString()
+  @MinLength(20)
+  @MaxLength(8000)
+  id_token!: string;
+}
+
 export class RefreshTokenDto {
   @ApiProperty({ description: 'Refresh token recibido en login/refresh' })
   @IsString()

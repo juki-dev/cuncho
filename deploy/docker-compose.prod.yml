@@ -79,6 +79,9 @@ services:
       DB_NAME: ${DB_NAME:?}
       DB_SSL: "false"
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?}
+      # Inicio de sesión con Google (opcionales; vacías = desactivado)
+      COGNITO_USER_POOL_ID: ${COGNITO_USER_POOL_ID:-}
+      COGNITO_APP_CLIENT_ID: ${COGNITO_APP_CLIENT_ID:-}
       JWT_ACCESS_TTL_SECONDS: ${JWT_ACCESS_TTL_SECONDS:-900}
       JWT_REFRESH_TTL_SECONDS: ${JWT_REFRESH_TTL_SECONDS:-2592000}
       THROTTLE_TTL_MS: ${THROTTLE_TTL_MS:-60000}

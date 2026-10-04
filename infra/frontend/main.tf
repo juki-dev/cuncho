@@ -18,7 +18,7 @@ locals {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https://*.basemaps.cartocdn.com",
     "font-src 'self' data:",
-    "connect-src 'self' ${var.api_origin} https://*.basemaps.cartocdn.com",
+    join(" ", concat(["connect-src 'self'", var.api_origin, "https://*.basemaps.cartocdn.com"], var.extra_connect_src)),
     "worker-src 'self'",
     "manifest-src 'self'",
     "object-src 'none'",

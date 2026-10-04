@@ -36,6 +36,17 @@ describe('configuración', () => {
     expect(() => validateEnv({ ...baseEnv, TRUST_PROXY: '-1' })).toThrow(/TRUST_PROXY/);
   });
 
+  it('Cognito: desactivado por defecto, deriva el emisor del id del pool y exige las dos variables', () => {
+    expect(buildConfig(validateEnv<EnvironmentVariables>(baseEnv)).cognito).toBeNull();
+    const cfg = buildConfig(
+      validateEnv<EnvironmentVariables>({ ...baseEnv, COGNITO_USER_POOL_ID: 'us-east-1_AbC123', COGNITO_APP_CLIENT_ID: 'cli' }),
+    );
+    expect(cfg.cognito).toEqual({ issuer: 'https://cognito-idp.us-east-1.amazonaws.com/us-east-1_AbC123', clientId: 'cli' });
+    expect(() => buildConfig(validateEnv<EnvironmentVariables>({ ...baseEnv, COGNITO_USER_POOL_ID: 'us-east-1_AbC123' }))).toThrow(/COGNITO/);
+    // Compose pasa cadenas vacías cuando no están definidas: equivale a desactivado.
+    expect(buildConfig(validateEnv<EnvironmentVariables>({ ...baseEnv, COGNITO_USER_POOL_ID: '', COGNITO_APP_CLIENT_ID: '' })).cognito).toBeNull();
+  });
+
   it.each(['DB_HOST', 'JWT_ACCESS_SECRET', 'CORS_ORIGINS', 'RECOMMENDATION_WEIGHT_JACCARD'])(
     'falla si falta %s',
     (key) => {

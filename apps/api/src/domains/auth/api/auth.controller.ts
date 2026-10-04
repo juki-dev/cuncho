@@ -3,7 +3,7 @@ import { ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, 
 import { ApiErrorResponses } from '../../../shared/http';
 import { Public, StrictRateLimit } from '../../../shared/security';
 import { AuthService } from '../application/auth.service';
-import { AuthTokensDto, LoginDto, RefreshTokenDto, RegisterDto } from './auth.dto';
+import { AuthTokensDto, CognitoLoginDto, LoginDto, RefreshTokenDto, RegisterDto } from './auth.dto';
 
 @ApiTags('auth')
 @Public()
@@ -27,6 +27,15 @@ export class AuthController {
   @ApiErrorResponses(400, 401, 429)
   login(@Body() dto: LoginDto): Promise<AuthTokensDto> {
     return this.auth.login(dto.email, dto.password);
+  }
+
+  @Post('cognito')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Iniciar sesión con Google (ID token de Cognito); crea la cuenta si no existe' })
+  @ApiOkResponse({ type: AuthTokensDto })
+  @ApiErrorResponses(400, 401, 404, 409, 429)
+  cognito(@Body() dto: CognitoLoginDto): Promise<AuthTokensDto> {
+    return this.auth.loginWithCognito(dto.id_token);
   }
 
   @Post('refresh')

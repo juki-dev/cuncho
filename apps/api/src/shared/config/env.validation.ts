@@ -23,6 +23,9 @@ export enum NodeEnv {
 const toBool = ({ value }: { value: unknown }) =>
   typeof value === 'string' ? ['1', 'true', 'yes'].includes(value.toLowerCase()) : value;
 
+/** Compose pasa `VAR=` (cadena vacía) cuando no está definida en el .env: se trata como ausente. */
+const emptyToUndefined = ({ value }: { value: unknown }) => (value === '' ? undefined : value);
+
 /** Variables mínimas para conectarse a la base (las usa también la CLI de TypeORM). */
 export class DatabaseEnv {
   @IsString() @IsNotEmpty() DB_HOST!: string;
@@ -44,6 +47,10 @@ export class EnvironmentVariables extends DatabaseEnv {
 
   /** Saltos de proxy de confianza para `X-Forwarded-For` (0 = ninguno; 1 = Caddy delante de la API). */
   @IsOptional() @Type(() => Number) @IsInt() @Min(0) @Max(5) TRUST_PROXY: number = 0;
+
+  /** Inicio de sesión con Google vía Cognito. Opcional: sin estas dos variables el endpoint queda desactivado. */
+  @IsOptional() @Transform(emptyToUndefined) @IsString() @IsNotEmpty() COGNITO_USER_POOL_ID?: string;
+  @IsOptional() @Transform(emptyToUndefined) @IsString() @IsNotEmpty() COGNITO_APP_CLIENT_ID?: string;
 
   @IsString() @MinLength(32) JWT_ACCESS_SECRET!: string;
   @Type(() => Number) @IsInt() @Min(60) JWT_ACCESS_TTL_SECONDS!: number;
