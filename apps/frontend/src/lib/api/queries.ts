@@ -1,12 +1,13 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
-import type { BBox, Coordenadas } from './types'
+import type { BBox, Catacion, Coordenadas } from './types'
 import { listarPendientes } from '../offline-queue'
 
 export const claves = {
   lugares: (bbox: BBox | null) => ['lugares', bbox] as const,
   cercanos: (c: Coordenadas | null, radioKm: number) => ['lugares', 'cercanos', c, radioKm] as const,
   misCataciones: ['cataciones', 'mias'] as const,
+  catacion: (id: string) => ['cataciones', 'detalle', id] as const,
   pendientes: ['cataciones', 'pendientes'] as const,
 }
 
@@ -41,4 +42,16 @@ export function useMisCataciones() {
 
 export function usePendientes() {
   return useQuery({ queryKey: claves.pendientes, queryFn: listarPendientes, networkMode: 'always' })
+}
+
+/** Detalle de una catación propia; parte de la bitácora en caché si ya está cargada. */
+export function useCatacion(id: string, enabled = true) {
+  const qc = useQueryClient()
+  return useQuery({
+    queryKey: claves.catacion(id),
+    queryFn: ({ signal }) => api.catacion(id, signal),
+    enabled,
+    initialData: () => qc.getQueryData<Catacion[]>(claves.misCataciones)?.find((c) => c.id === id),
+    initialDataUpdatedAt: () => qc.getQueryState(claves.misCataciones)?.dataUpdatedAt,
+  })
 }

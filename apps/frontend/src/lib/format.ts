@@ -15,6 +15,13 @@ export function formatearFechaCorta(iso: string): string {
   return `${d.getDate()} ${MESES[d.getMonth()]}`
 }
 
+/** "28 sep 2026 · 4:40 p. m." para el detalle de una catación. */
+export function formatearFechaLarga(iso: string): string {
+  const d = new Date(iso)
+  const hora = d.toLocaleTimeString('es-CO', { hour: 'numeric', minute: '2-digit' })
+  return `${formatearFechaCorta(iso)} ${d.getFullYear()} · ${hora}`
+}
+
 export function formatearPuntaje(p: number): string {
   return String(Math.round(p * 100) / 100)
 }

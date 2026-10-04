@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import type { NuevaCatacion } from '../../lib/api/types'
 import { formatearFechaCorta } from '../../lib/format'
 import { ScoreBadge } from '../../components/ScoreBadge'
@@ -17,7 +18,10 @@ export function BitacoraList({ entradas }: { entradas: readonly EntradaBitacora[
         const { puntaje, escala } = c.sensorial
         return (
           <li key={id}>
-            <article className={`${s.entry} ${pendiente ? s.pending : ''}`}>
+            <Link
+              to={`/bitacora/${encodeURIComponent(id)}`}
+              className={`${s.entry} ${pendiente ? s.pending : ''}`}
+            >
               <ScoreBadge
                 puntaje={puntaje}
                 label={escala === 'SCA' ? `${puntaje} puntos SCA` : `${puntaje} de 10, escala personal`}
@@ -44,7 +48,7 @@ export function BitacoraList({ entradas }: { entradas: readonly EntradaBitacora[
                   </span>
                 )}
               </div>
-            </article>
+            </Link>
           </li>
         )
       })}

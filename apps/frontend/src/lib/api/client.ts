@@ -185,6 +185,9 @@ export const api = {
     return out
   },
 
+  catacion: async (id: string, signal?: AbortSignal): Promise<Catacion> =>
+    aCatacion(await request<TastingDto>(`/tastings/${encodeURIComponent(id)}`, { signal })),
+
   crearCatacion: async (payload: NuevaCatacion): Promise<Catacion> => {
     const lugarId = payload.lugar.id ?? (await crearLugar(payload.lugar))
     const { finca, region, ...grano } = payload.grano

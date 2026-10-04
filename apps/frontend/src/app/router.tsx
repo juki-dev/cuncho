@@ -4,6 +4,7 @@ import { TabsLayout } from './TabsLayout'
 import { NotFound } from './NotFound'
 import { ExplorarPage } from '../features/map/ExplorarPage'
 import { BitacoraPage } from '../features/bitacora/BitacoraPage'
+import { CatacionDetallePage } from '../features/bitacora/CatacionDetallePage'
 import { Paso1Lugar } from '../features/catacion/Paso1Lugar'
 import { Paso2Grano } from '../features/catacion/Paso2Grano'
 import { Paso3Sensorial } from '../features/catacion/Paso3Sensorial'
@@ -35,6 +36,7 @@ export const routes: RouteObject[] = [
           { path: '/catar/grano', element: <Paso2Grano /> },
           { path: '/catar/sensorial', element: <Paso3Sensorial /> },
           { path: '/recomendar', element: <RecomendacionPage /> },
+          { path: '/bitacora/:id', element: <CatacionDetallePage /> },
         ],
       },
       { path: '*', element: <NotFound /> },

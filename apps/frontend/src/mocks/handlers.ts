@@ -10,6 +10,7 @@ import { catacionesFixture, lugaresFixture, USUARIO_DEMO } from './fixtures'
  *   GET  /places/nearby?lat&lng&radius(km)           → Lugar[] + distancia_m
  *   POST /places  {nombre,lat,lng}                   → Lugar
  *   GET  /tastings/me?limit&cursor                   → { items, siguiente_cursor }
+ *   GET  /tastings/:id                               → Catacion (404 si no es propia)
  *   POST /tastings (lugar.id obligatorio)            → Catacion (200 si el id ya existía)
  *   POST /auth/login | /auth/register | /auth/refresh | /auth/logout
  * No valida el token: con mocks el frontend arranca con una sesión demo.
@@ -89,6 +90,13 @@ export function crearHandlers() {
         items: cataciones.filter((c) => c.usuario_id === USUARIO_DEMO),
         siguiente_cursor: null,
       })
+    }),
+
+    http.get(`${API}/tastings/:id`, async ({ params }) => {
+      await delay(150)
+      const c = cataciones.find((x) => x.id === params.id && x.usuario_id === USUARIO_DEMO)
+      if (!c) return HttpResponse.json({ statusCode: 404, error: 'Not Found', message: 'Catación no encontrada' }, { status: 404 })
+      return HttpResponse.json(c)
     }),
 
     http.post(`${API}/tastings`, async ({ request }) => {
