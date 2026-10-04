@@ -36,19 +36,19 @@ El menú de acciones (`Acciones.dc.html`) es un `BottomSheet` que se abre desde 
 Es el de la API Nest.js (`apps/api`; Swagger en `/docs` del entorno local). `src/lib/api/client.ts` adapta
 las respuestas a los tipos de la UI (p. ej. `distancia_m` → `distancia_km`). Prefijo `/api/v1`.
 
-| Uso | Endpoint |
-|---|---|
-| Pines del mapa | `GET /places?bbox=oeste,sur,este,norte` |
-| Cafeterías cercanas | `GET /places/nearby?lat&lng&radius` (km) |
-| Crear lugar | `POST /places` (409 si hay duplicado cercano: se usa el existente) |
-| Bitácora | `GET /tastings/me?limit&cursor` (paginada; el cliente recorre las páginas) |
-| Guardar catación | `POST /tastings` con `lugar.id` y un `id` UUID del cliente (idempotente) |
+| Uso | Endpoint | Auth |
+|---|---|---|
+| Pines del mapa | `GET /places?bbox=oeste,sur,este,norte` | pública |
+| Cafeterías cercanas | `GET /places/nearby?lat&lng&radius` (km) | Bearer |
+| Crear lugar | `POST /places` (409 si hay duplicado cercano: se usa el existente) | Bearer |
+| Bitácora | `GET /tastings/me?limit&cursor` (paginada; el cliente recorre las páginas) | Bearer |
+| Guardar catación | `POST /tastings` con `lugar.id` y un `id` UUID del cliente (idempotente) | Bearer |
+| Sesión | `POST /auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout` | — |
 
 Guardar una catación en un lugar nuevo son dos llamadas: `POST /places` y luego `POST /tastings`.
 El `id` de la catación se genera al encolarla, así que reintentar (cola sin conexión) no la duplica.
-
-**Autenticación: pendiente.** El frontend no envía token. La API exige Bearer en `/places/nearby`,
-`/places` (POST), `/tastings/*` y `/recommendations`; solo `GET /places` (mapa) es pública. Hasta que se
-añada el login, esas llamadas responden 401 contra la API real.
+Un 401 renueva el token una vez (single-flight) y reintenta; si el refresh falla, se cierra la sesión.
+Las rutas `/catar/*`, `/bitacora` y `/recomendar` exigen sesión (`/acceso`); el mapa es público.
+Con `VITE_API_MOCKS=true` el frontend arranca con una sesión demo y MSW imita este mismo contrato.
 
 La recomendación se calcula en el cliente (`features/recomendacion/ranking.ts`) sobre `/places/nearby`. La API tiene `GET /recommendations`; migrarla es una mejora pendiente.

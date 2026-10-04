@@ -11,7 +11,8 @@ import { catacionesFixture, lugaresFixture, USUARIO_DEMO } from './fixtures'
  *   POST /places  {nombre,lat,lng}                   → Lugar
  *   GET  /tastings/me?limit&cursor                   → { items, siguiente_cursor }
  *   POST /tastings (lugar.id obligatorio)            → Catacion (200 si el id ya existía)
- *
+ *   POST /auth/login | /auth/register | /auth/refresh | /auth/logout
+ * No valida el token: con mocks el frontend arranca con una sesión demo.
  */
 const API = (import.meta.env.VITE_API_URL ?? '/api').replace(/\/$/, '')
 
@@ -21,8 +22,26 @@ export function crearHandlers() {
   let seq = 200
 
   const dtoLugar = (l: Lugar) => ({ ...l, destacada: l.destacada && { ...l.destacada, puntaje: l.puntaje_promedio ?? 0 } })
+  const sesion = (nombre = 'Demo', email = 'demo@cuncho.co') => ({
+    access_token: 'demo',
+    refresh_token: 'demo-refresh-token-0000',
+    expires_in: 900,
+    token_type: 'Bearer',
+    usuario: { id: USUARIO_DEMO, email, nombre },
+  })
 
   return [
+    http.post(`${API}/auth/login`, async ({ request }) => {
+      const { email } = (await request.json()) as { email: string }
+      return HttpResponse.json(sesion('Demo', email))
+    }),
+    http.post(`${API}/auth/register`, async ({ request }) => {
+      const { email, nombre } = (await request.json()) as { email: string; nombre: string }
+      return HttpResponse.json(sesion(nombre, email), { status: 201 })
+    }),
+    http.post(`${API}/auth/refresh`, () => HttpResponse.json(sesion())),
+    http.post(`${API}/auth/logout`, () => new HttpResponse(null, { status: 204 })),
+
     http.get(`${API}/places`, async ({ request }) => {
       await delay(250)
       const bbox = new URL(request.url).searchParams.get('bbox')?.split(',').map(Number)

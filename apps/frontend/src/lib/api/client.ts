@@ -1,4 +1,5 @@
-import type { BBox, Catacion, Coordenadas, Descriptor, Lugar, LugarCercano, Metodo, NuevaCatacion, Proceso } from './types'
+import { useSesion } from '../auth/session'
+import type { BBox, Catacion, Coordenadas, Descriptor, Lugar, LugarCercano, Metodo, NuevaCatacion, Proceso, Sesion } from './types'
 
 const API_URL = (import.meta.env.VITE_API_URL ?? '/api').replace(/\/$/, '')
 
@@ -22,16 +23,54 @@ export class NetworkError extends Error {
   }
 }
 
-async function enviar(path: string, init: RequestInit): Promise<Response> {
+interface Opciones extends RequestInit {
+  /** false = no envía el token ni intenta renovarlo (login, registro, refresh). */
+  auth?: boolean
+}
+
+async function enviar(path: string, init: Opciones, token: string | null): Promise<Response> {
+  const resto: RequestInit = { ...init }
+  delete (resto as Opciones).auth
   try {
     return await fetch(`${API_URL}${path}`, {
-      ...init,
-      headers: { Accept: 'application/json', ...(init.body ? { 'Content-Type': 'application/json' } : {}), ...init.headers },
+      ...resto,
+      headers: {
+        Accept: 'application/json',
+        ...(resto.body ? { 'Content-Type': 'application/json' } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...resto.headers,
+      },
     })
   } catch (e) {
     if (e instanceof DOMException && e.name === 'AbortError') throw e
     throw new NetworkError(e)
   }
+}
+
+/** Una sola renovación a la vez: las peticiones que reciben 401 a la vez comparten el resultado. */
+let renovando: Promise<string | null> | null = null
+
+function renovarToken(): Promise<string | null> {
+  renovando ??= (async () => {
+    const { refreshToken, iniciar, limpiar } = useSesion.getState()
+    if (!refreshToken) return null
+    try {
+      const res = await enviar('/auth/refresh', { method: 'POST', body: JSON.stringify({ refresh_token: refreshToken }) }, null)
+      if (!res.ok) {
+        // El refresh token es de un solo uso: si el servidor lo rechaza, la sesión terminó.
+        if (res.status === 401 || res.status === 400) limpiar()
+        return null
+      }
+      const s = (await res.json()) as Sesion
+      iniciar({ accessToken: s.access_token, refreshToken: s.refresh_token, usuario: s.usuario })
+      return s.access_token
+    } catch {
+      return null // sin red: no se cierra la sesión
+    } finally {
+      renovando = null
+    }
+  })()
+  return renovando
 }
 
 async function errorDe(res: Response): Promise<ApiError> {
@@ -44,10 +83,15 @@ async function errorDe(res: Response): Promise<ApiError> {
   }
 }
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const res = await enviar(path, init)
+async function request<T>(path: string, init: Opciones = {}): Promise<T> {
+  const conAuth = init.auth !== false
+  let res = await enviar(path, init, conAuth ? useSesion.getState().accessToken : null)
+  if (res.status === 401 && conAuth && useSesion.getState().refreshToken) {
+    const nuevo = await renovarToken()
+    if (nuevo) res = await enviar(path, init, nuevo)
+  }
   if (!res.ok) throw await errorDe(res)
-  return (await res.json()) as T
+  return res.status === 204 ? (undefined as T) : ((await res.json()) as T)
 }
 
 const qs = (params: Record<string, string | number>) =>
@@ -159,4 +203,12 @@ export const api = {
     return aCatacion(t)
   },
 
+  registrar: (datos: { email: string; password: string; nombre: string }) =>
+    request<Sesion>('/auth/register', { method: 'POST', body: JSON.stringify(datos), auth: false }),
+
+  iniciarSesion: (datos: { email: string; password: string }) =>
+    request<Sesion>('/auth/login', { method: 'POST', body: JSON.stringify(datos), auth: false }),
+
+  cerrarSesion: (refreshToken: string) =>
+    request<void>('/auth/logout', { method: 'POST', body: JSON.stringify({ refresh_token: refreshToken }), auth: false }),
 }

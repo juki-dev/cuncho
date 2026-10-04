@@ -1,7 +1,8 @@
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
-import { api } from './client'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { useSesion } from '../auth/session'
+import { api, ApiError } from './client'
 import type { NuevaCatacion } from './types'
 
 const API = 'http://localhost/api'
@@ -9,6 +10,18 @@ const server = setupServer()
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
 afterEach(() => server.resetHandlers())
 afterAll(() => server.close())
+
+const sesion = (access: string, refresh = 'r1') => ({
+  access_token: access,
+  refresh_token: refresh,
+  expires_in: 900,
+  token_type: 'Bearer',
+  usuario: { id: 'u1', email: 'a@b.co', nombre: 'Ana' },
+})
+
+beforeEach(() => {
+  useSesion.setState({ accessToken: 'a1', refreshToken: 'r1', usuario: null })
+})
 
 const place = { id: 'p1', nombre: 'Origen', lat: 5.07, lng: -75.51, puntaje_promedio: 90, total_cataciones: 1, descriptores: ['frutal'], destacada: null }
 
@@ -29,17 +42,20 @@ describe('api: lugares', () => {
     expect(r[0]).toMatchObject({ id: 'p1', nombre: 'Origen' })
   })
 
-  it('lugaresCercanos usa radius y convierte distancia_m a distancia_km', async () => {
+  it('lugaresCercanos usa radius y convierte distancia_m a distancia_km, con token', async () => {
     let q: URLSearchParams | undefined
+    let auth: string | null = null
     server.use(
       http.get(`${API}/places/nearby`, ({ request }) => {
         q = new URL(request.url).searchParams
+        auth = request.headers.get('authorization')
         return HttpResponse.json([{ ...place, distancia_m: 420 }])
       }),
     )
     const r = await api.lugaresCercanos({ lat: 5.07, lng: -75.51 }, 2.5)
     expect(q?.get('radius')).toBe('2.5')
     expect(q?.has('radio_km')).toBe(false)
+    expect(auth).toBe('Bearer a1')
     expect(r[0]?.distancia_km).toBeCloseTo(0.42)
   })
 })
@@ -117,5 +133,48 @@ describe('api: crearCatacion', () => {
       }),
     )
     await expect(api.crearCatacion(nueva({ nombre: 'Origen', lat: 5.07, lng: -75.51 }))).resolves.toBeDefined()
+  })
+})
+
+describe('api: sesión', () => {
+  it('401 → renueva el token una sola vez (varias peticiones a la vez) y reintenta', async () => {
+    let refrescos = 0
+    server.use(
+      http.post(`${API}/auth/refresh`, async ({ request }) => {
+        refrescos++
+        expect(((await request.json()) as { refresh_token: string }).refresh_token).toBe('r1')
+        return HttpResponse.json(sesion('a2', 'r2'))
+      }),
+      http.get(`${API}/places/nearby`, ({ request }) =>
+        request.headers.get('authorization') === 'Bearer a2'
+          ? HttpResponse.json([])
+          : HttpResponse.json({ statusCode: 401, error: 'Unauthorized', message: 'Unauthorized' }, { status: 401 }),
+      ),
+    )
+    const c = { lat: 5, lng: -75 }
+    await Promise.all([api.lugaresCercanos(c, 1), api.lugaresCercanos(c, 1), api.lugaresCercanos(c, 1)])
+    expect(refrescos).toBe(1)
+    expect(useSesion.getState()).toMatchObject({ accessToken: 'a2', refreshToken: 'r2' })
+  })
+
+  it('401 y refresh rechazado → cierra la sesión y propaga el error', async () => {
+    server.use(
+      http.post(`${API}/auth/refresh`, () => HttpResponse.json({ statusCode: 401, error: 'Unauthorized', message: 'x' }, { status: 401 })),
+      http.get(`${API}/places/nearby`, () => HttpResponse.json({ statusCode: 401, error: 'Unauthorized', message: 'Unauthorized' }, { status: 401 })),
+    )
+    await expect(api.lugaresCercanos({ lat: 5, lng: -75 }, 1)).rejects.toMatchObject({ status: 401 })
+    expect(useSesion.getState().accessToken).toBeNull()
+  })
+
+  it('login con credenciales malas → ApiError 401 sin intentar renovar', async () => {
+    let refrescos = 0
+    server.use(
+      http.post(`${API}/auth/refresh`, () => (refrescos++, HttpResponse.json({}, { status: 401 }))),
+      http.post(`${API}/auth/login`, () => HttpResponse.json({ statusCode: 401, error: 'Unauthorized', message: 'Credenciales inválidas' }, { status: 401 })),
+    )
+    const e = await api.iniciarSesion({ email: 'a@b.co', password: 'x' }).catch((x: unknown) => x)
+    expect(e).toBeInstanceOf(ApiError)
+    expect((e as ApiError).message).toBe('Credenciales inválidas')
+    expect(refrescos).toBe(0)
   })
 })
