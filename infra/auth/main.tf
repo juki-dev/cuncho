@@ -44,10 +44,13 @@ resource "aws_cognito_identity_provider" "google" {
     authorize_scopes = "openid email profile"
   }
 
+  # email_verified es imprescindible: la API solo acepta cuentas con el correo verificado.
+  # Sin este mapeo Cognito lo deja en false y el ID token se rechaza (401 en /auth/cognito).
   attribute_mapping = {
-    email    = "email"
-    name     = "name"
-    username = "sub"
+    email          = "email"
+    email_verified = "email_verified"
+    name           = "name"
+    username       = "sub"
   }
 }
 
