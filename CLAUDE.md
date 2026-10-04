@@ -53,7 +53,8 @@ La carpeta `design/` contiene las pantallas aprobadas (formato `.dc.html`: HTML 
 - Proceso: Lavado | Natural | Honey | Anaeróbico
 - Método: V60 | Aeropress | Espresso | Chemex | Prensa Francesa
 - Acidez 1–5: Láctica, Málica, Cítrica, Tartárica, Fosfórica
-- Descriptores: frutal, chocolate, floral, dulce (cada nota mapea a uno)
+- Descriptores: frutal, chocolate, floral, dulce. Cada nota del catálogo mapea a uno o a ninguno
+- Notas: catálogo de ~110 notas de la rueda de sabores SCA en español (`FLAVOR_NOTES` en la API; copia en el frontend, `notasCafe.ts`). Las familias Especias, Tostado, Verde, Ácido/Fermentado y Otros no tienen descriptor. Se aceptan notas personalizadas (2–40 caracteres) sin descriptor; el frontend las busca con un buscador que muestra las 10 mejores coincidencias
 - Escala SCA: ≥90 Excepcional, 85–89.99 Excelente, 80–84.99 Muy bueno
 
 ## Algoritmo de recomendación

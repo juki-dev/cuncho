@@ -34,8 +34,8 @@ test('registra una catación guiada completa y aparece en la bitácora', async (
 
   await page.getByLabel('Acidez').fill('4')
   await expect(page.getByText('Tartárica', { exact: true }).first()).toBeVisible()
-  await page.getByRole('button', { name: 'Jazmín' }).click()
-  await page.getByRole('button', { name: 'Cítricos' }).click()
+  await page.getByRole('button', { name: 'Jazmín', exact: true }).click()
+  await page.getByRole('button', { name: 'Cítricos', exact: true }).click()
   await expect(page.getByText('2 notas')).toBeVisible()
   await page.getByRole('button', { name: 'Guardar en mi bitácora' }).click()
 
@@ -64,4 +64,34 @@ test('la recomendación se puede ver en el mapa con el pin destacado', async ({ 
   await expect(page).toHaveURL(/\/$/)
   await expect(page.getByRole('button', { name: 'Recomendado: Origen Cafetería, 92 puntos' })).toBeVisible()
   await expect(page.getByText('Recomendado para ti')).toBeVisible()
+})
+
+test('las notas se buscan en toda la rueda del café (máx. 10 resultados) y admiten notas propias', async ({ page }) => {
+  await page.goto('/catar/lugar')
+  await page.getByRole('button', { name: 'Continuar con Origen Cafetería' }).click()
+  await page.getByRole('button', { name: 'Geisha' }).click()
+  await page.getByRole('group', { name: 'Proceso' }).getByRole('button', { name: 'Lavado' }).click()
+  await page.getByRole('button', { name: 'V60' }).click()
+  await page.getByRole('button', { name: 'Continuar a la evaluación' }).click()
+
+  const buscar = page.getByLabel('Buscar nota')
+  const resultados = page.getByRole('group', { name: 'Resultados' }).getByRole('button')
+  await expect(resultados).toHaveCount(10) // sugerencias
+
+  await buscar.fill('a')
+  await expect(resultados).toHaveCount(10)
+  await expect(page.getByRole('status').filter({ hasText: 'Mostrando 10 de' })).toBeVisible()
+
+  await buscar.fill('canela') // sin descriptor, pero válida
+  await page.getByRole('button', { name: 'Canela', exact: true }).click()
+  await buscar.fill('maracuya') // sin tilde
+  await page.getByRole('button', { name: 'Maracuyá', exact: true }).click()
+  await buscar.fill('sabor a pan tostado') // personalizada
+  await page.getByRole('button', { name: /Agregar «Sabor a pan tostado»/ }).click()
+  await expect(page.getByText('3 notas')).toBeVisible()
+  await expect(page.getByRole('list', { name: 'Notas elegidas' }).getByRole('listitem')).toHaveCount(3)
+
+  await page.getByRole('button', { name: 'Guardar en mi bitácora' }).click()
+  await expect(page).toHaveURL(/\/bitacora$/)
+  await expect(page.getByRole('article').first()).toContainText('Geisha · Lavado · V60')
 })

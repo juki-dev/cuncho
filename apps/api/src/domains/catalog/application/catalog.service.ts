@@ -6,8 +6,10 @@ import {
   BREW_METHODS,
   Descriptor,
   DESCRIPTOR_INFO,
-  descriptorsFromNotes,
+  FLAVOR_NOTES,
   NOTE_DESCRIPTOR,
+  resolveNotes,
+  ResolvedNotes,
   PROCESSES,
   SCALE_RULES,
   SCALES,
@@ -25,7 +27,7 @@ export class CatalogService {
       tipo: ACIDITY_BY_LEVEL[nivel].type,
       etiqueta: ACIDITY_BY_LEVEL[nivel].label,
     })),
-    notas: Object.entries(NOTE_DESCRIPTOR).map(([nombre, descriptor]) => ({ nombre, descriptor })),
+    notas: FLAVOR_NOTES.map(({ nombre, familia, descriptor }) => ({ nombre, familia, descriptor })),
     descriptores: DESCRIPTOR_INFO.map((d) => ({ id: d.id, etiqueta: d.label, pista: d.hint })),
     escalas: SCALES.map((id) => ({ id, min: SCALE_RULES[id].min, max: SCALE_RULES[id].max, paso: SCALE_RULES[id].step })),
   };
@@ -34,9 +36,9 @@ export class CatalogService {
     return this.catalog;
   }
 
-  /** Deriva descriptores desde las notas (lanza UnknownNotesError si alguna no existe). */
-  descriptorsFromNotes(notes: readonly string[]): Descriptor[] {
-    return descriptorsFromNotes(notes);
+  /** Resuelve las notas de una catación (lanza InvalidNotesError si alguna no es válida). */
+  resolveNotes(notes: readonly string[]): ResolvedNotes {
+    return resolveNotes(notes);
   }
 
   descriptorOf(note: string): Descriptor | undefined {

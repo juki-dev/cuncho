@@ -5,7 +5,7 @@ import { DataSource } from 'typeorm';
 import { isUniqueViolation } from '../../../shared/database';
 import { AppException, CursorPage, decodeCursor, encodeCursor } from '../../../shared/http';
 import type { AuthenticatedUser } from '../../../shared/types';
-import { CatalogService, UnknownNotesError } from '../../catalog';
+import { CatalogService, InvalidNotesError } from '../../catalog';
 import { PlaceNotFoundError, PlacesService } from '../../places';
 import { CreateTastingDto, TastingResponseDto, TastingStatsDto } from '../api/tastings.dto';
 import { resolveTastingId } from '../domain/idempotency';
@@ -121,11 +121,11 @@ export class TastingsService {
     const date = resolveTastingDate(dto.creado_en, new Date());
     if ('error' in date) throw badRequest(date.error, 'creado_en');
 
-    let descriptors;
+    let resolved;
     try {
-      descriptors = this.catalog.descriptorsFromNotes(sensorial.notas);
+      resolved = this.catalog.resolveNotes(sensorial.notas);
     } catch (e) {
-      if (e instanceof UnknownNotesError) throw badRequest(e.message, 'sensorial.notas');
+      if (e instanceof InvalidNotesError) throw badRequest(e.message, 'sensorial.notas');
       throw e;
     }
 
@@ -141,8 +141,8 @@ export class TastingsService {
       method: grano.metodo,
       acidityLevel: sensorial.acidez.nivel,
       acidityType: sensorial.acidez.tipo,
-      notes: sensorial.notas,
-      descriptors,
+      notes: resolved.notes,
+      descriptors: resolved.descriptors,
       score: sensorial.puntaje,
       scale: sensorial.escala,
       normalizedScore: normalizeScore(sensorial.escala, sensorial.puntaje),

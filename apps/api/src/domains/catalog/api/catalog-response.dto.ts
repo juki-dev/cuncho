@@ -9,7 +9,14 @@ export class AcidityOptionDto {
 
 export class NoteOptionDto {
   @ApiProperty({ example: 'Frutos Rojos' }) nombre!: string;
-  @ApiProperty({ enum: DESCRIPTORS, example: 'frutal' }) descriptor!: string;
+  @ApiProperty({ example: 'Frutos rojos y bayas', description: 'Familia de la rueda de sabores del café' }) familia!: string;
+  @ApiProperty({
+    enum: DESCRIPTORS,
+    nullable: true,
+    example: 'frutal',
+    description: 'null si la nota no encaja en ningún descriptor (no influye en las recomendaciones)',
+  })
+  descriptor!: string | null;
 }
 
 export class DescriptorOptionDto {

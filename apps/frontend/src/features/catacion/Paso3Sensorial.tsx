@@ -8,18 +8,17 @@ import {
   ESCALA_PERSONAL,
   ESCALA_SCA,
   ETIQUETA_ACIDEZ,
-  NOTAS_SENSORIAL,
   TIPOS_ACIDEZ,
 } from '../../lib/catalogo'
 import { guardarCatacion } from '../../lib/offline-queue'
 import { Button } from '../../components/Button'
 import { Card } from '../../components/Card'
-import { ChipGroup } from '../../components/ChipGroup'
 import { RangeField } from '../../components/RangeField'
 import { StepHeader } from '../../components/StepHeader'
 import { StepLayout } from '../../components/StepLayout'
 import { IconCheck } from '../../components/icons'
 import type { EstadoBitacora } from '../bitacora/BitacoraPage'
+import { NotaPicker } from './NotaPicker'
 import { aPayload, faltantesGrano, useBorradorHidratado, useCatacionDraft } from './useCatacionDraft'
 import s from './Paso3Sensorial.module.css'
 
@@ -44,7 +43,6 @@ export function Paso3Sensorial() {
   const puntaje = sca ? sensorial.puntajeSca : sensorial.puntajePersonal
   const puntajeTexto = sca ? puntaje.toFixed(2) : puntaje.toFixed(1)
   const puntajeEtiqueta = sca ? clasificarSca(puntaje) : 'de 10 · escala personal'
-  const n = sensorial.notas.length
 
   const guardar = async () => {
     const payload = aPayload(borrador)
@@ -105,14 +103,9 @@ export function Paso3Sensorial() {
       </Card>
 
       <Card as="section">
-        <ChipGroup
-          multiple
-          muted
-          legend="Perfil de sabor"
-          aside={n === 1 ? '1 nota' : `${n} notas`}
-          options={NOTAS_SENSORIAL}
+        <NotaPicker
           value={sensorial.notas}
-          onChange={(nota) => {
+          onToggle={(nota) => {
             alternarNota(nota)
             setError(null)
           }}

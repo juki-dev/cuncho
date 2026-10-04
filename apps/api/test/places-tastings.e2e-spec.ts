@@ -105,7 +105,7 @@ describe('Places + Tastings (e2e)', () => {
       desc                    | patch                                                         | field
       ${'paso SCA inválido'}  | ${{ sensorial: { puntaje: 90.1 } }}                           | ${'sensorial.puntaje'}
       ${'personal fuera'}     | ${{ sensorial: { puntaje: 11, escala: 'Personal' } }}         | ${'sensorial.puntaje'}
-      ${'nota desconocida'}   | ${{ sensorial: { notas: ['Mango'] } }}                        | ${'sensorial.notas'}
+      ${'nota con HTML'}      | ${{ sensorial: { notas: ['<b>x</b>'] } }}                     | ${'sensorial.notas'}
       ${'proceso inválido'}   | ${{ grano: { proceso: 'Tostado' } }}                          | ${'grano.proceso'}
       ${'acidez fuera'}       | ${{ sensorial: { acidez: { nivel: 6, tipo: 'Cítrica' } } }}   | ${'sensorial.acidez.nivel'}
       ${'fecha futura'}       | ${{ creado_en: '2999-01-01T00:00:00Z' }}                      | ${'creado_en'}
@@ -119,6 +119,20 @@ describe('Places + Tastings (e2e)', () => {
       };
       const res = await http().post(`${API}/tastings`).set(auth(ana)).send(body).expect(400);
       expect(res.body.details.map((d: { field: string }) => d.field)).toContain(field);
+    });
+
+    it('acepta notas personalizadas y de toda la rueda; normaliza tildes y no inventa descriptores', async () => {
+      const res = await http()
+        .post(`${API}/tastings`)
+        .set(auth(ana))
+        .send(
+          tastingBody(origen, {
+            sensorial: { ...tastingBody(origen).sensorial, notas: ['canela', 'jazmin', 'sabor a pan tostado'], puntaje: 88 },
+          }),
+        )
+        .expect(201);
+      expect(res.body.sensorial.notas).toEqual(['Canela', 'Jazmín', 'Sabor a pan tostado']);
+      expect(res.body.sensorial.descriptores).toEqual(['floral']); // Canela y la personalizada no aportan
     });
 
     it('lugar inexistente → 404', async () => {

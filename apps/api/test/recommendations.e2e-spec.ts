@@ -79,7 +79,9 @@ describe('Recommendations (e2e)', () => {
       { id: 'SCA', min: 0, max: 100, paso: 0.25 },
       { id: 'Personal', min: 1, max: 10, paso: 0.5 },
     ]);
-    expect(res.body.notas).toContainEqual({ nombre: 'Hibisco', descriptor: 'floral' });
+    expect(res.body.notas).toContainEqual({ nombre: 'Hibisco', familia: 'Floral', descriptor: 'floral' });
+    expect(res.body.notas).toContainEqual({ nombre: 'Canela', familia: 'Especias', descriptor: null });
+    expect(res.body.notas.length).toBeGreaterThanOrEqual(100);
   });
 
   it('Swagger publica el OpenAPI', async () => {

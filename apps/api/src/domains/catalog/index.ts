@@ -7,7 +7,8 @@ export {
   PROCESSES,
   SCALE_RULES,
   SCALES,
-  UnknownNotesError,
+  InvalidNotesError,
+  FLAVOR_NOTES,
   isDescriptor,
 } from './domain/catalog';
 export type { AcidityLevel, AcidityType, BrewMethod, Descriptor, Process, Scale } from './domain/catalog';

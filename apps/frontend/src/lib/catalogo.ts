@@ -1,3 +1,4 @@
+import { NOTAS_CAFE } from './notasCafe'
 import type { Descriptor, Metodo, NivelAcidez, Proceso, TipoAcidez } from './api/types'
 
 export const PROCESOS: readonly Proceso[] = ['Lavado', 'Natural', 'Honey', 'Anaeróbico']
@@ -21,25 +22,39 @@ export const ETIQUETA_ACIDEZ: Record<NivelAcidez, string> = {
   5: 'Fosfórica · brillante',
 }
 
-/** Cada nota de sabor mapea a un descriptor (CLAUDE.md). */
-export const NOTA_DESCRIPTOR: Readonly<Record<string, Descriptor>> = {
-  'Jazmín': 'floral',
-  'Hibisco': 'floral',
-  'Bergamota': 'floral',
-  'Cítricos': 'frutal',
-  'Frutos Rojos': 'frutal',
-  'Durazno': 'frutal',
-  'Naranja': 'frutal',
-  'Panela': 'dulce',
-  'Caramelo': 'dulce',
-  'Chocolate Negro': 'chocolate',
-  'Nuez': 'chocolate',
-}
+/** Minúsculas y sin tildes: para comparar lo que escribe el usuario con el catálogo. */
+export const plegar = (texto: string): string =>
+  texto
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim()
 
-/** Notas que se ofrecen en el paso sensorial, en el orden del diseño. */
-export const NOTAS_SENSORIAL: readonly string[] = [
-  'Jazmín', 'Cítricos', 'Frutos Rojos', 'Panela', 'Chocolate Negro', 'Caramelo', 'Nuez', 'Hibisco',
+/** Nota del catálogo → descriptor, solo las que tienen uno (las demás no influyen en recomendaciones). */
+export const NOTA_DESCRIPTOR: Readonly<Record<string, Descriptor>> = Object.fromEntries(
+  NOTAS_CAFE.flatMap((n) => (n.descriptor ? [[n.nombre, n.descriptor] as const] : [])),
+)
+
+const DESCRIPTOR_POR_NOTA_PLEGADA = new Map(NOTAS_CAFE.map((n) => [plegar(n.nombre), n.descriptor]))
+
+/** Sugerencias cuando el buscador está vacío (las del diseño original + dos frecuentes). */
+export const NOTAS_POPULARES: readonly string[] = [
+  'Jazmín', 'Cítricos', 'Frutos Rojos', 'Panela', 'Chocolate Negro', 'Caramelo', 'Nuez', 'Hibisco', 'Miel', 'Cacao',
 ]
+
+/** Máximo de notas por catación (igual que la API). */
+export const MAX_NOTAS = 12
+
+/** Misma regla que la API para una nota personalizada: 2–40 caracteres, letras/números y signos básicos. */
+const NOTA_PERSONALIZADA = /^[\p{L}\p{N}][\p{L}\p{N} '’().,/-]{1,39}$/u
+export const esNotaValida = (texto: string) => NOTA_PERSONALIZADA.test(texto.trim().replace(/\s+/g, ' '))
+
+/** Primera letra en mayúscula y espacios normalizados (como hace la API con las notas personalizadas). */
+export const normalizarNota = (texto: string): string => {
+  const t = texto.trim().replace(/\s+/g, ' ')
+  return t.charAt(0).toLocaleUpperCase('es') + t.slice(1)
+}
 
 export const DESCRIPTORES: readonly { id: Descriptor; etiqueta: string; pista: string }[] = [
   { id: 'frutal', etiqueta: 'Frutal / Cítrico', pista: 'Frutos rojos, naranja' },
@@ -48,11 +63,11 @@ export const DESCRIPTORES: readonly { id: Descriptor; etiqueta: string; pista: s
   { id: 'dulce', etiqueta: 'Dulce / Panela', pista: 'Caramelo, miel' },
 ]
 
-/** Descriptores únicos a partir de las notas elegidas, en orden de aparición. */
+/** Descriptores únicos a partir de las notas elegidas, en orden de aparición. Las personalizadas no aportan. */
 export function descriptoresDeNotas(notas: readonly string[]): Descriptor[] {
   const out: Descriptor[] = []
   for (const n of notas) {
-    const d = NOTA_DESCRIPTOR[n]
+    const d = DESCRIPTOR_POR_NOTA_PLEGADA.get(plegar(n))
     if (d && !out.includes(d)) out.push(d)
   }
   return out

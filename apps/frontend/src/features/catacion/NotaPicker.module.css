@@ -1,0 +1,6 @@
+.legend { display: flex; justify-content: space-between; align-items: baseline; width: 100%; }
+.aside { font-size: 12px; font-weight: 600; color: var(--text-3); }
+.elegidas { list-style: none; margin: 0 0 4px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.crear { border-style: dashed; border-color: var(--dashed); }
+.crear:not(:disabled) { color: var(--selected-text); }
+.elegidas button, .crear { text-align: left; }
